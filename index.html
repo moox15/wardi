@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#071F1C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="وِرْدي">
+  <meta name="description" content="وِرْدي برو — رفيقك الإسلامي اليومي لتلاوة القرآن والأذكار والأدعية وحفظ الأوراد">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>وِرْدي | Wardi Pro</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="./assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
+
+  <!-- Typography: Amiri & Noto Sans Arabic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Mobile-First Luxury Stylesheet -->
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body data-theme="dark" data-lang="ar">
+
+  <!-- No-JS Graceful Fallback -->
+  <noscript>
+    <div style="text-align:center;padding:48px 24px;font-family:'Noto Sans Arabic',sans-serif;color:#F7F4EC;background:#071F1C;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+      <h1 style="color:#D8B56A;margin-bottom:16px;">وِرْدي</h1>
+      <p>يرجى تفعيل JavaScript لاستخدام التطبيق</p>
+      <p style="margin-top:8px;color:#7E968E;">Please enable JavaScript to use Wardi Pro.</p>
+    </div>
+  </noscript>
+
+  <!-- ============================================ -->
+  <!-- MOBILE APP SHELL                             -->
+  <!-- ============================================ -->
+  <div id="app-container">
+
+    <!-- MAIN SCROLLABLE CONTENT -->
+    <main id="main-content" role="main">
+
+      <!-- ======================================== -->
+      <!-- 1. HOME SCREEN SECTION                   -->
+      <!-- ======================================== -->
+      <section id="home-section" class="section active" aria-label="الرئيسية">
+
+        <!-- Mobile Top App Bar -->
+        <header class="mobile-top-bar">
+          <div class="top-bar-user-info">
+            <h2 id="greeting-text" class="top-bar-greeting">السلام عليكم 🌙</h2>
+            <div class="top-bar-dates">
+              <span id="hijri-date">--</span>
+              <span class="date-dot">•</span>
+              <span id="gregorian-date">--</span>
+            </div>
+          </div>
+          <button id="open-settings-btn" class="top-bar-action-btn" aria-label="الإعدادات" title="الإعدادات">
+            ⚙️
+          </button>
+        </header>
+
+        <!-- Main Hero: Worship Ring & Daily Progress -->
+        <div class="home-hero-widget pattern-bg">
+          <div class="hero-header-row">
+            <div class="hero-title-wrap">
+              <span class="hero-badge-icon">✨</span>
+              <span class="hero-title">وِرد اليوم</span>
+            </div>
+            <div class="hero-streak-pill">
+              <span>🔥</span>
+              <span>مستمر</span>
+            </div>
+          </div>
+
+          <div class="hero-stats-grid">
+            <!-- Tasbeeh Progress Box -->
+            <div class="hero-stat-box">
+              <div class="hero-stat-label">
+                <span>📿</span>
+                <span>تسبيح اليوم</span>
+              </div>
+              <div class="hero-stat-value-group">
+                <span id="daily-tasbeeh-count" class="hero-stat-num">0</span>
+                <span class="hero-stat-target">/ <span id="daily-tasbeeh-goal">100</span></span>
+              </div>
+              <div class="hero-mini-progress">
+                <div id="daily-tasbeeh-progress" class="hero-mini-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- Quran Pages Box -->
+            <div class="hero-stat-box">
+              <div class="hero-stat-label">
+                <span>📖</span>
+                <span>تلاوة القرآن</span>
+              </div>
+              <div class="hero-stat-value-group">
+                <span id="daily-quran-pages" class="hero-stat-num">0</span>
+                <span class="hero-stat-target">صفحة</span>
+              </div>
+              <div class="hero-mini-progress">
+                <div class="hero-mini-fill" style="width: 100%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Continue Reading Smart Banner -->
+        <div id="continue-reading-btn" class="continue-reading-card" role="button" tabindex="0">
+          <div class="continue-left-content">
+            <div class="continue-icon-circle">📖</div>
+            <div class="continue-text-meta">
+              <h4>متابعة القراءة</h4>
+              <p class="continue-detail">سورة الفاتحة — آية 1</p>
+            </div>
+          </div>
+          <div class="continue-action-arrow">←</div>
+        </div>
+
+        <!-- Quick Actions Grid (4 Primary Mobile Touch Targets) -->
+        <div class="quick-actions-section-title">
+          <span>⚡</span>
+          <span>الوصول السريع</span>
+        </div>
+        <div class="quick-actions-grid">
+          <div class="quick-action-tile" data-action="goto-quran" role="button" tabindex="0">
+            <div class="tile-icon-wrap">📖</div>
+            <div class="tile-label-wrap">
+              <div class="tile-title">القرآن الكريم</div>
+              <div class="tile-sub">قراءة المصحف</div>
+            </div>
+          </div>
+          <div class="quick-action-tile" data-action="goto-tasbeeh" role="button" tabindex="0">
+            <div class="tile-icon-wrap">📿</div>
+            <div class="tile-label-wrap">
+              <div class="tile-title">السبحة الرقمية</div>
+              <div class="tile-sub">ورد التسبيح</div>
+            </div>
+          </div>
+          <div class="quick-action-tile" data-action="goto-duas" role="button" tabindex="0">
+            <div class="tile-icon-wrap">🤲</div>
+            <div class="tile-label-wrap">
+              <div class="tile-title">أدعيتي الخاصة</div>
+              <div class="tile-sub">المناجاة والرجاء</div>
+            </div>
+          </div>
+          <div class="quick-action-tile" data-action="goto-azkar" role="button" tabindex="0">
+            <div class="tile-icon-wrap">🌅</div>
+            <div class="tile-label-wrap">
+              <div class="tile-title">أذكار اليوم</div>
+              <div class="tile-sub">الصباح والمساء</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spiritual Daily Reminder -->
+        <div class="spiritual-reminder-card pattern-bg">
+          <div class="spiritual-reminder-header">
+            <span>💫</span>
+            <span>تذكير اليوم</span>
+          </div>
+          <p id="daily-reminder" class="reminder-text">أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ</p>
+        </div>
+
+        <!-- Favorite Duas Quick Carousel -->
+        <div class="home-block">
+          <div class="home-block-header">
+            <span class="home-block-title">الأدعية المفضلة</span>
+            <span class="home-block-link" data-action="goto-duas">عرض الكل ←</span>
+          </div>
+          <div id="home-favorites-list" class="favorites-list">
+            <p class="empty-state">لا توجد أدعية مفضلة بعد</p>
+          </div>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="home-block">
+          <div class="home-block-header">
+            <span class="home-block-title">النشاط الأخير</span>
+          </div>
+          <div id="recent-activity-list" class="activity-list">
+            <p class="empty-state">لا يوجد نشاط حديث</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ======================================== -->
+      <!-- 2. QURAN SECTION                         -->
+      <!-- ======================================== -->
+      <section id="quran-section" class="section" aria-label="القرآن الكريم">
+
+        <!-- Surah Browser View (Default) -->
+        <div id="quran-surah-list-view" class="quran-view">
+          <div class="mobile-top-bar" style="padding-bottom: 8px;">
+            <h2 class="top-bar-greeting">القرآن الكريم 📖</h2>
+          </div>
+
+          <div class="quran-header-bar">
+            <div class="quran-search-container">
+              <input type="search" id="surah-search-input" class="search-input" placeholder="ابحث باسم السورة أو رقمها..." aria-label="البحث عن سورة">
+              <span class="search-icon-inside" aria-hidden="true">🔍</span>
+            </div>
+          </div>
+
+          <!-- Bookmarks Drawer / Panel -->
+          <div class="card" style="padding:14px; margin-bottom: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span style="font-size:0.9rem; font-weight:700; color:var(--gold-warm);">🔖 العلامات المرجعية</span>
+            </div>
+            <div id="quran-bookmarks-list" class="bookmarks-list">
+              <p class="empty-state" style="padding:8px 0; font-size:0.85rem;">لا توجد علامات مرجعية محفوظة</p>
+            </div>
+          </div>
+
+          <!-- Surah List Container -->
+          <div id="surah-list-container" class="surah-list-container">
+            <!-- Rendered by quran.js -->
+          </div>
+        </div>
+
+        <!-- Immersive Reader View (Hidden by default) -->
+        <div id="quran-reader-view" class="quran-view" style="display:none;">
+          <!-- Floating Reader Top Bar -->
+          <div id="quran-reader-header" class="reader-header">
+            <button id="quran-back-btn" class="reader-btn-pill" aria-label="العودة للسور">
+              → السور
+            </button>
+            <h3 id="quran-surah-title" class="reader-surah-title">--</h3>
+            <div class="reader-controls-cluster">
+              <button id="quran-font-decrease" class="reader-btn-pill" aria-label="تصغير الخط">أ-</button>
+              <button id="quran-font-increase" class="reader-btn-pill" aria-label="تكبير الخط">أ+</button>
+              <button id="quran-bookmark-btn" class="reader-btn-pill" aria-label="إضافة علامة مرجعية">🔖</button>
+            </div>
+          </div>
+
+          <!-- Ayah Search Inside Current Surah -->
+          <div class="quran-search-container" style="margin-bottom: 14px;">
+            <input type="search" id="quran-search-ayah-input" class="search-input" placeholder="ابحث في آيات السورة..." aria-label="البحث في الآيات">
+            <span class="search-icon-inside" aria-hidden="true">🔍</span>
+          </div>
+
+          <!-- Mushaf Reading Canvas -->
+          <div id="quran-ayah-display" class="mushaf-container" role="article" aria-label="عرض آيات القرآن">
+            <!-- Ayahs rendered by quran.js -->
+          </div>
+
+          <!-- Page / Surah Indicator -->
+          <div style="text-align:center; font-size:0.8rem; color:var(--gold-warm); margin-bottom: 12px;">
+            <span id="quran-page-number">--</span>
+          </div>
+
+          <!-- Reader Navigation (Prev / Next Surah) -->
+          <div class="reader-navigation">
+            <button id="quran-prev-btn" class="nav-btn" aria-label="السورة السابقة">
+              السورة السابقة →
+            </button>
+            <button id="quran-next-btn" class="nav-btn" aria-label="السورة التالية">
+              ← السورة التالية
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ======================================== -->
+      <!-- 3. TASBEEH SECTION                       -->
+      <!-- ======================================== -->
+      <section id="tasbeeh-section" class="section" aria-label="التسبيح والأذكار">
+
+        <!-- Top Title Bar -->
+        <div class="mobile-top-bar" style="padding-bottom: 8px;">
+          <h2 class="top-bar-greeting">السبحة والأذكار 📿</h2>
+        </div>
+
+        <!-- Tasbeeh Hero Counter Experience -->
+        <div class="tasbeeh-counter-view">
+          <!-- Active Dhikr Display -->
+          <div class="tasbeeh-phrase-display-wrap">
+            <p id="tasbeeh-phrase-display" class="tasbeeh-phrase">سبحان الله</p>
+          </div>
+
+          <!-- Tactile Interactive Ring Counter -->
+          <div class="tasbeeh-counter-container">
+            <div id="tasbeeh-progress-ring" class="tasbeeh-progress-ring" role="button" aria-label="اضغط للعد">
+              <div class="ring-center">
+                <span id="tasbeeh-count-display" class="tasbeeh-count">0</span>
+                <span class="tasbeeh-target-label">الهدف</span>
+                <span id="tasbeeh-target-display" class="tasbeeh-target">33</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Large Ergonomic Tap Button -->
+          <button id="tasbeeh-increment-btn" class="tasbeeh-tap-btn" aria-label="اضغط للتسبيح">
+            <span>اضغط للتسبيح</span>
+            <span style="font-size:1.4rem;">📿</span>
+          </button>
+
+          <!-- Secondary Quick Controls (Undo, Reset, Sound) -->
+          <div class="tasbeeh-controls">
+            <button id="tasbeeh-undo-btn" class="control-btn" aria-label="تراجع">
+              <span>↩</span>
+              <span>تراجع</span>
+            </button>
+            <button id="tasbeeh-reset-btn" class="control-btn" aria-label="إعادة تعيين">
+              <span>🔄</span>
+              <span>تصفير</span>
+            </button>
+            <button id="tasbeeh-sound-toggle" class="control-btn" aria-label="تبديل الصوت">
+              <span>🔊</span>
+              <span>الصوت</span>
+            </button>
+          </div>
+
+          <!-- Dhikr Preset Carousel -->
+          <div class="home-block">
+            <div class="home-block-header">
+              <span class="home-block-title">اختر الذكر</span>
+            </div>
+            <div id="tasbeeh-phrase-select" class="phrase-select-list">
+              <!-- Rendered by tasbeeh.js -->
+            </div>
+
+            <!-- Custom Dhikr Input Row -->
+            <div style="display:flex; gap:8px; margin-top:10px;">
+              <input type="text" id="tasbeeh-custom-phrase-input" class="text-input" placeholder="أدخل ذكرًا مخصصًا..." style="flex:2;" aria-label="ذكر مخصص">
+              <input type="number" id="tasbeeh-target-input" class="number-input" placeholder="الهدف" min="1" max="10000" value="33" style="flex:1;" aria-label="العدد المستهدف">
+            </div>
+          </div>
+
+          <!-- Quick Stats Row -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+            <div class="card" style="padding:14px; text-align:center;">
+              <span style="font-size:0.75rem; color:var(--text-muted); display:block;">تسبيح اليوم</span>
+              <span id="tasbeeh-daily-count" style="font-size:1.5rem; font-weight:800; color:var(--text-primary);">0</span>
+            </div>
+            <div class="card" style="padding:14px; text-align:center;">
+              <span style="font-size:0.75rem; color:var(--text-muted); display:block;">الإجمالي العام</span>
+              <span id="tasbeeh-lifetime-count" style="font-size:1.5rem; font-weight:800; color:var(--gold-warm);">0</span>
+            </div>
+          </div>
+
+          <!-- Sessions History -->
+          <div class="home-block">
+            <div class="home-block-header">
+              <span class="home-block-title">جلسات اليوم</span>
+            </div>
+            <div id="tasbeeh-sessions-list">
+              <p class="empty-state">لا توجد جلسات سابقة</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Categorized Azkar Browser -->
+        <div class="azkar-browser" style="margin-top:28px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.06);">
+          <div class="home-block-header">
+            <h3 class="home-block-title" style="font-size:1.05rem;">موسوعة الأذكار المأثورة 🌅</h3>
+          </div>
+
+          <!-- Categories Grid -->
+          <div id="azkar-categories-list" class="azkar-categories">
+            <!-- Rendered by tasbeeh.js -->
+          </div>
+
+          <!-- Azkar Detail Content View -->
+          <div id="azkar-content-view" style="display:none; margin-top:12px;">
+            <div class="view-back-header">
+              <button id="azkar-back-btn" class="view-back-btn" aria-label="العودة للأذكار">→</button>
+              <h3 id="azkar-category-title" class="view-back-title">--</h3>
+            </div>
+            <div id="azkar-items-list" style="display:flex; flex-direction:column; gap:12px;">
+              <!-- Rendered by tasbeeh.js -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ======================================== -->
+      <!-- 4. DUAS SECTION                          -->
+      <!-- ======================================== -->
+      <section id="duas-section" class="section" aria-label="الأدعية">
+
+        <!-- Top Title Bar -->
+        <div class="mobile-top-bar" style="padding-bottom: 8px;">
+          <h2 class="top-bar-greeting">الأدعية والمناجاة 🤲</h2>
+        </div>
+
+        <!-- Dedicated "أدعيتي الخاصة" Banner -->
+        <div class="duas-banner-personal pattern-bg">
+          <div>
+            <div class="banner-title">✨ أدعيتي الخاصة</div>
+            <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">
+              أدعيتك المحفوظة ومناجاتك المستجابة بإذن الله
+            </p>
+          </div>
+          <span style="font-size:1.6rem;">🤍</span>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="quran-search-container" style="margin-bottom: 12px;">
+          <input type="search" id="duas-search-input" class="search-input" placeholder="ابحث في أدعيتك..." aria-label="البحث في الأدعية">
+          <span class="search-icon-inside" aria-hidden="true">🔍</span>
+        </div>
+
+        <!-- Category Scrollable Pills -->
+        <div id="duas-category-filter" class="category-filter">
+          <button class="filter-pill active" data-category="all">الكل</button>
+          <button class="filter-pill" data-category="personal">أدعية شخصية</button>
+          <button class="filter-pill" data-category="distress">تفريج الهم</button>
+          <button class="filter-pill" data-category="rizq">أدعية الرزق</button>
+          <button class="filter-pill" data-category="answered">الاستجابة</button>
+          <button class="filter-pill" data-category="quran">أدعية القرآن</button>
+          <button class="filter-pill" data-category="salawat">الصلاة على النبي</button>
+          <button class="filter-pill" data-category="general">أدعية متنوعة</button>
+        </div>
+
+        <!-- Duas List Container -->
+        <div id="duas-list-container" class="duas-list">
+          <!-- Rendered by duas.js -->
+        </div>
+
+        <!-- FAB for Adding Duas -->
+        <button id="duas-add-btn" class="fab" aria-label="إضافة دعاء جديد" title="إضافة دعاء">
+          +
+        </button>
+
+        <!-- Add / Edit Dua Bottom Sheet Modal -->
+        <div id="dua-modal" class="modal" role="dialog" aria-modal="true" style="display:none;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 id="dua-modal-title">إضافة دعاء جديد</h3>
+              <button id="dua-cancel-btn" class="btn-icon" aria-label="إغلاق">✕</button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="dua-text-input">نص الدعاء المبارك</label>
+                <textarea id="dua-text-input" class="textarea-input" rows="4" placeholder="اكتب نص الدعاء هنا بقلب خاشع..." required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="dua-category-select">التصنيف</label>
+                <select id="dua-category-select" class="select-input">
+                  <option value="personal">أدعية شخصية</option>
+                  <option value="distress">أدعية تفريج الهم</option>
+                  <option value="rizq">أدعية الرزق</option>
+                  <option value="answered">أدعية الاستجابة</option>
+                  <option value="quran">أدعية القرآن</option>
+                  <option value="salawat">الصلاة على النبي</option>
+                  <option value="general">أدعية متنوعة</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="dua-notes-input">ملاحظات أو مناسبة الدعاء</label>
+                <textarea id="dua-notes-input" class="textarea-input" rows="2" placeholder="ملاحظات شخصية، المصدر، أو وقت الاستحباب..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="dua-repetition-input">عدد التكرار المستحب</label>
+                <input type="number" id="dua-repetition-input" class="number-input" min="1" max="1000" value="1">
+              </div>
+            </div>
+            <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+              <button id="dua-delete-btn" class="btn btn-danger" style="display:none;">حذف 🗑️</button>
+              <div style="display:flex; gap:10px; margin-right:auto;">
+                <button id="dua-cancel-btn" class="btn btn-secondary">إلغاء</button>
+                <button id="dua-save-btn" class="btn btn-primary">حفظ الدعاء</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ======================================== -->
+      <!-- 5. HISTORY SECTION                       -->
+      <!-- ======================================== -->
+      <section id="history-section" class="section" aria-label="السجل والإحصاءات">
+
+        <div class="mobile-top-bar" style="padding-bottom: 8px;">
+          <h2 class="top-bar-greeting">السجل والإحصاءات 📊</h2>
+        </div>
+
+        <!-- Motivational Streak & Totals Card -->
+        <div class="history-stats-row">
+          <div class="history-stat-card card">
+            <span class="stat-icon">🔥</span>
+            <span class="stat-label">أيام الالتزام</span>
+            <span id="history-streak-count" class="stat-value">0</span>
+          </div>
+          <div class="history-stat-card card">
+            <span class="stat-icon">📿</span>
+            <span class="stat-label">إجمالي التسبيح</span>
+            <span id="history-total-tasbeeh" class="stat-value">0</span>
+          </div>
+          <div class="history-stat-card card">
+            <span class="stat-icon">📖</span>
+            <span class="stat-label">صفحات القرآن</span>
+            <span id="history-total-quran" class="stat-value">0</span>
+          </div>
+        </div>
+
+        <!-- Period Segmented Tabs -->
+        <div class="history-tabs" role="tablist">
+          <button id="history-tab-daily" class="tab-btn active" data-period="daily">يومي</button>
+          <button id="history-tab-weekly" class="tab-btn" data-period="weekly">أسبوعي</button>
+          <button id="history-tab-monthly" class="tab-btn" data-period="monthly">شهري</button>
+        </div>
+
+        <!-- Activity Bar Chart Card -->
+        <div class="card" style="padding:16px; margin-bottom:20px;">
+          <div class="home-block-header">
+            <span class="home-block-title">مخطط النشاط التعبدي</span>
+          </div>
+          <div id="history-chart-container" class="chart-container" role="img" aria-label="مخطط النشاط">
+            <!-- Rendered by history.js -->
+          </div>
+        </div>
+
+        <!-- Personal Records -->
+        <div class="card" style="padding:16px; margin-bottom:20px;">
+          <div class="home-block-header">
+            <span class="home-block-title">الأرقام القياسية الشخصية 🏆</span>
+          </div>
+          <div id="history-records-list">
+            <!-- Rendered by history.js -->
+          </div>
+        </div>
+
+        <!-- Activity Timeline Feed -->
+        <div class="card" style="padding:16px;">
+          <div class="home-block-header">
+            <span class="home-block-title">سجل الأنشطة بالتفصيل</span>
+          </div>
+          <div id="history-activity-list">
+            <!-- Rendered by history.js -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ======================================== -->
+      <!-- 6. SETTINGS SECTION                      -->
+      <!-- ======================================== -->
+      <section id="settings-section" class="section" aria-label="الإعدادات">
+
+        <div class="view-back-header">
+          <button id="settings-back-btn" class="view-back-btn" aria-label="رجوع">→</button>
+          <h2 class="view-back-title">الإعدادات ⚙️</h2>
+        </div>
+
+        <!-- Appearance Group -->
+        <div class="settings-group">
+          <h3 class="settings-group-title">المظهر واللغة</h3>
+          <div class="card">
+            <!-- Dark / Light Theme -->
+            <div class="setting-row">
+              <div class="setting-info">
+                <span class="setting-icon">🌙</span>
+                <div>
+                  <span class="setting-label">الوضع الداكن الفاخر</span>
+                  <span class="setting-description">ألوان الزمرد والذهب المريحة للعين</span>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-theme-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Language Toggle -->
+            <div class="setting-row">
+              <div class="setting-info">
+                <span class="setting-icon">🌐</span>
+                <div>
+                  <span class="setting-label">اللغة</span>
+                  <span class="setting-description">العربية (RTL) / English</span>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-language-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Font Size -->
+            <div class="setting-row" style="flex-direction:column; align-items:stretch; gap:10px;">
+              <div class="setting-info" style="justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <span class="setting-icon">🔤</span>
+                  <span class="setting-label">حجم خط النصوص</span>
+                </div>
+                <span id="setting-font-size-value" style="font-weight:700; color:var(--gold-warm);">18px</span>
+              </div>
+              <input type="range" id="setting-font-size-range" class="range-slider" min="14" max="32" value="18" step="1" aria-label="حجم الخط">
+            </div>
+          </div>
+        </div>
+
+        <!-- Sound & Feedback Group -->
+        <div class="settings-group">
+          <h3 class="settings-group-title">التفضيلات والاستجابة</h3>
+          <div class="card">
+            <!-- Sound -->
+            <div class="setting-row">
+              <div class="setting-info">
+                <span class="setting-icon">🔊</span>
+                <div>
+                  <span class="setting-label">النغمة الصوتية الهادئة</span>
+                  <span class="setting-description">صوت تسبيح لطيف عند الضغط</span>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-sound-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Haptic -->
+            <div class="setting-row">
+              <div class="setting-info">
+                <span class="setting-icon">📳</span>
+                <div>
+                  <span class="setting-label">الاهتزاز التفاعلي</span>
+                  <span class="setting-description">تغذية لمسية عند كل تسبيحة</span>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-haptic-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Daily Goal -->
+            <div class="setting-row">
+              <div class="setting-info">
+                <span class="setting-icon">🎯</span>
+                <div>
+                  <span class="setting-label">هدف التسبيح اليومي</span>
+                  <span class="setting-description">عدد التسبيحات المستهدف يوميًا</span>
+                </div>
+              </div>
+              <input type="number" id="setting-daily-goal-input" class="number-input" min="1" max="10000" value="100" style="width:90px; text-align:center;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Management Group -->
+        <div class="settings-group">
+          <h3 class="settings-group-title">البيانات والنسخ الاحتياطي</h3>
+          <div class="card" style="padding:16px;">
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:14px;">
+              بياناتك محفوظة محلياً في متصفحك. نوصي بتصدير نسخة احتياطية من وقت لآخر لحفظها بأمان.
+            </p>
+            <div style="display:flex; gap:10px; margin-bottom:12px;">
+              <button id="setting-export-btn" class="btn btn-secondary" style="flex:1;">
+                <span>📤</span>
+                <span>تصدير نسخة JSON</span>
+              </button>
+              <button id="setting-import-btn" class="btn btn-secondary" style="flex:1;">
+                <span>📥</span>
+                <span>استيراد نسخة</span>
+              </button>
+              <input type="file" id="setting-import-file" accept=".json" style="display:none;">
+            </div>
+            <button id="setting-clear-btn" class="btn btn-danger" style="width:100%;">
+              <span>🗑️</span>
+              <span>مسح كافة البيانات المحلية</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- About & Privacy -->
+        <div class="settings-group">
+          <h3 class="settings-group-title">حول التطبيق والخصوصية</h3>
+          <div class="card" style="padding:16px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+              <span style="font-size:0.85rem; color:var(--text-secondary);">الإصدار</span>
+              <span id="app-version" style="font-weight:700; color:var(--gold-warm);">1.0.0</span>
+            </div>
+            <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.6;">
+              🔒 <strong>خصوصية تامة 100%:</strong> لا خوادم خارجية، لا تتبع، ولا إعلانات. أدعيتك وتسبيحاتك وعلاماتك محفوظة على هذا الجهاز فقط.
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ============================================ -->
+    <!-- 5-TAB MOBILE FIXED BOTTOM NAVIGATION         -->
+    <!-- ============================================ -->
+    <nav id="bottom-nav" role="navigation" aria-label="التنقل الرئيسي">
+      <button class="nav-item active" data-section="home" aria-label="الرئيسية">
+        <span class="nav-icon" aria-hidden="true">🏠</span>
+        <span class="nav-label">الرئيسية</span>
+      </button>
+      <button class="nav-item" data-section="quran" aria-label="القرآن الكريم">
+        <span class="nav-icon" aria-hidden="true">📖</span>
+        <span class="nav-label">القرآن</span>
+      </button>
+      <button class="nav-item" data-section="tasbeeh" aria-label="التسبيح">
+        <span class="nav-icon" aria-hidden="true">📿</span>
+        <span class="nav-label">السبحة</span>
+      </button>
+      <button class="nav-item" data-section="duas" aria-label="الأدعية">
+        <span class="nav-icon" aria-hidden="true">🤲</span>
+        <span class="nav-label">الأدعية</span>
+      </button>
+      <button class="nav-item" data-section="history" aria-label="السجل">
+        <span class="nav-icon" aria-hidden="true">📊</span>
+        <span class="nav-label">السجل</span>
+      </button>
+    </nav>
+
+  </div><!-- /#app-container -->
+
+  <!-- ============================================ -->
+  <!-- FLOATING TOAST CONTAINER                     -->
+  <!-- ============================================ -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- ============================================ -->
+  <!-- MODAL BACKDROP OVERLAY                       -->
+  <!-- ============================================ -->
+  <div id="modal-overlay" class="modal-overlay" style="display:none;" aria-hidden="true"></div>
+
+  <!-- ============================================ -->
+  <!-- CORE SCRIPTS — Sequential Load Order         -->
+  <!-- ============================================ -->
+  <script src="./assets/js/storage.js"></script>
+  <script src="./assets/js/history.js"></script>
+  <script src="./assets/js/quran.js"></script>
+  <script src="./assets/js/tasbeeh.js"></script>
+  <script src="./assets/js/duas.js"></script>
+  <script src="./assets/js/app.js"></script>
+
+</body>
+</html>

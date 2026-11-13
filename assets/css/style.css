@@ -1,0 +1,1793 @@
+/* ==========================================================================
+   وِرْدي | Wardi Pro — Luxury Islamic Mobile-First PWA Design System
+   Architecture: Mobile-First · Arabic RTL Default · Safe-Area Aware
+   ========================================================================== */
+
+/* ── Typography Imports ── */
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap');
+
+/* ==========================================================================
+   1. Design Tokens & CSS Custom Properties
+   ========================================================================== */
+:root {
+  /* Brand Palette */
+  --primary-deep: #062F29;
+  --primary-emerald: #0B5D4B;
+  --primary-rich: #11745B;
+
+  /* Gold Accents */
+  --gold-warm: #D8B56A;
+  --gold-champagne: #E9D8AE;
+  --gold-glow: rgba(216, 181, 106, 0.25);
+  --gold-border: rgba(216, 181, 106, 0.18);
+  --accent: var(--gold-warm);
+  --accent-hover: var(--gold-champagne);
+  --border: var(--gold-border);
+
+  /* Dark Theme Tokens (Default) */
+  --bg-deep: #071F1C;
+  --bg-surface: #0E352E;
+  --bg-card: #103A32;
+  --bg-card-elevated: #14473D;
+  --bg-glass: rgba(16, 58, 50, 0.72);
+  --bg-nav: rgba(7, 31, 28, 0.94);
+
+  /* Typography Colors */
+  --text-primary: #F7F4EC;
+  --text-secondary: #B8C9C1;
+  --text-muted: #7E968E;
+  --text-gold: #D8B56A;
+  --text-on-gold: #172B25;
+
+  /* System States */
+  --danger: #E05A47;
+  --danger-bg: rgba(224, 90, 71, 0.15);
+  --success: #3EAF76;
+  --success-bg: rgba(62, 175, 118, 0.15);
+
+  /* Typography Families */
+  --font-arabic: 'Amiri', 'Traditional Arabic', serif;
+  --font-ui: 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-quran: 'Amiri', 'Traditional Arabic', serif;
+
+  /* Radii */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
+  --radius-full: 9999px;
+
+  /* Elevation Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.35);
+  --shadow-gold: 0 4px 20px rgba(216, 181, 106, 0.2);
+
+  /* Transitions */
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.18s var(--ease-smooth);
+  --transition-normal: 0.28s var(--ease-smooth);
+
+  /* Layout Limits */
+  --app-max-width: 440px;
+  --bottom-nav-height: 68px;
+  --header-height: 64px;
+}
+
+/* Light Theme Overrides */
+[data-theme="light"] {
+  --bg-deep: #F6F2E9;
+  --bg-surface: #EFE9DC;
+  --bg-card: #FFFFFF;
+  --bg-card-elevated: #FAF8F2;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+  --bg-nav: rgba(246, 242, 233, 0.94);
+
+  --text-primary: #172B25;
+  --text-secondary: #3D5A50;
+  --text-muted: #6E887E;
+  --text-gold: #9B792A;
+
+  --gold-warm: #9B792A;
+  --gold-border: rgba(155, 121, 42, 0.22);
+  --gold-glow: rgba(155, 121, 42, 0.15);
+
+  --shadow-sm: 0 2px 8px rgba(23, 43, 37, 0.06);
+  --shadow-md: 0 6px 20px rgba(23, 43, 37, 0.08);
+  --shadow-lg: 0 12px 36px rgba(23, 43, 37, 0.12);
+}
+
+/* ==========================================================================
+   2. Global Reset & Base Setup
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  height: 100%;
+  background-color: var(--bg-deep);
+  color-scheme: dark;
+}
+
+[data-theme="light"] html {
+  color-scheme: light;
+}
+
+body {
+  font-family: var(--font-ui);
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  line-height: 1.5;
+  direction: rtl;
+  text-align: right;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Allow text selection specifically in reading & text areas */
+.mushaf-container, .dua-text, .azkar-item-text, .reminder-text {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* LTR Support */
+[dir="ltr"] {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(216, 181, 106, 0.25);
+  border-radius: var(--radius-full);
+}
+
+/* ==========================================================================
+   3. Mobile App Frame & Container
+   ========================================================================== */
+#app-container {
+  width: 100%;
+  max-width: var(--app-max-width);
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--bg-deep);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Desktop Backdrop Accent */
+@media (min-width: 500px) {
+  body {
+    background: radial-gradient(circle at 50% 25%, #0B5D4B 0%, #031210 100%);
+    padding: 16px 0;
+  }
+  #app-container {
+    border-radius: 36px;
+    border: 1px solid rgba(216, 181, 106, 0.2);
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.65);
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 499px) {
+  body {
+    background-color: var(--bg-deep);
+    padding: 0;
+  }
+  #app-container {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+/* Hide desktop sidebar completely for authentic mobile layout */
+#sidebar {
+  display: none !important;
+}
+
+/* Main Content Area */
+#main-content {
+  flex: 1;
+  width: 100%;
+  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 24px);
+  position: relative;
+}
+
+/* Section Transitions */
+.section {
+  display: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.25s var(--ease-smooth), transform 0.25s var(--ease-smooth);
+  padding: 16px 16px 24px 16px;
+}
+
+.section.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+  animation: mobileScreenFade 0.26s var(--ease-smooth) forwards;
+}
+
+@keyframes mobileScreenFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   4. Universal Mobile Header
+   ========================================================================== */
+.mobile-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 4px 12px 4px;
+  position: relative;
+}
+
+.top-bar-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.top-bar-greeting {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-bar-dates {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--gold-warm);
+  font-weight: 500;
+}
+
+.date-dot {
+  font-size: 0.6rem;
+  opacity: 0.6;
+}
+
+.top-bar-action-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.top-bar-action-btn:active {
+  transform: scale(0.92);
+  background: var(--primary-emerald);
+}
+
+/* Back Button for Secondary Views (Settings, Quran Reader, Azkar List) */
+.view-back-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 16px;
+}
+
+.view-back-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.view-back-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   5. Card System & Atmospheric Surfaces
+   ========================================================================== */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gold-border);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.card:active {
+  transform: scale(0.99);
+}
+
+.card-glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Subtle Geometric Pattern Overlay */
+.pattern-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: radial-gradient(var(--gold-warm) 1px, transparent 1px);
+  background-size: 16px 16px;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   6. Home Screen Redesign — Apple Health / Calm Inspired
+   ========================================================================== */
+/* Hero Worship Progress Widget */
+.home-hero-widget {
+  background: linear-gradient(145deg, #0E4238 0%, #082924 100%);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(216, 181, 106, 0.28);
+  padding: 22px 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-md), 0 0 24px rgba(11, 93, 75, 0.25);
+  position: relative;
+}
+
+.hero-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.hero-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-badge-icon {
+  font-size: 1.3rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.hero-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.hero-streak-pill {
+  background: rgba(216, 181, 106, 0.14);
+  border: 1px solid rgba(216, 181, 106, 0.35);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gold-warm);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hero-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.hero-stat-box {
+  background: rgba(6, 47, 41, 0.55);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.hero-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.hero-stat-value-group {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.hero-stat-num {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.hero-stat-target {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Custom Mini Progress Track */
+.hero-mini-progress {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.hero-mini-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-warm), #F3DC9B);
+  border-radius: var(--radius-full);
+  transition: width 0.4s var(--ease-smooth);
+}
+
+/* Continue Reading Smart Banner */
+.continue-reading-card {
+  background: linear-gradient(135deg, rgba(17, 116, 91, 0.45) 0%, rgba(11, 93, 75, 0.25) 100%);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.continue-reading-card:active {
+  transform: scale(0.98);
+  background: rgba(17, 116, 91, 0.6);
+}
+
+.continue-left-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.continue-icon-circle {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-full);
+  background: rgba(216, 181, 106, 0.15);
+  border: 1px solid rgba(216, 181, 106, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: var(--gold-warm);
+}
+
+.continue-text-meta h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.continue-text-meta p {
+  font-size: 0.8rem;
+  color: var(--gold-warm);
+}
+
+.continue-action-arrow {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  background: var(--gold-warm);
+  color: var(--text-on-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+/* Quick Action 4-Grid */
+.quick-actions-section-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.quick-action-tile {
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 104px;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.quick-action-tile:active {
+  transform: scale(0.96);
+  background: var(--primary-emerald);
+}
+
+.tile-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: rgba(216, 181, 106, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.tile-label-wrap {
+  margin-top: 10px;
+}
+
+.tile-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tile-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Spiritual Reminder Card */
+.spiritual-reminder-card {
+  background: linear-gradient(145deg, #0B3D34 0%, #062621 100%);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(216, 181, 106, 0.22);
+  padding: 18px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.spiritual-reminder-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--gold-warm);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.reminder-text {
+  font-family: var(--font-arabic);
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+}
+
+/* Home Section Blocks */
+.home-block {
+  margin-bottom: 20px;
+}
+
+.home-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.home-block-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.home-block-link {
+  font-size: 0.8rem;
+  color: var(--gold-warm);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Mini Dua Card on Home */
+.mini-dua-card {
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.mini-dua-card:active {
+  transform: scale(0.98);
+}
+
+.mini-dua-text {
+  font-family: var(--font-arabic);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   7. Quran Reader Redesign — Immersive Mushaf Surface
+   ========================================================================== */
+.quran-header-bar {
+  margin-bottom: 14px;
+}
+
+.quran-search-container {
+  position: relative;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  height: 46px;
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-full);
+  padding: 0 46px 0 16px;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+[dir="ltr"] .search-input {
+  padding: 0 16px 0 46px;
+}
+
+.search-input:focus {
+  border-color: var(--gold-warm);
+  box-shadow: 0 0 12px var(--gold-glow);
+}
+
+.search-icon-inside {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  pointer-events: none;
+}
+
+[dir="ltr"] .search-icon-inside {
+  right: auto;
+  left: 16px;
+}
+
+/* Surah Cards List */
+.surah-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.surah-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.surah-item:active {
+  transform: scale(0.98);
+  background: var(--primary-emerald);
+}
+
+.surah-item-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Islamic Star/Polygon Number Badge */
+.surah-number-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: rgba(216, 181, 106, 0.14);
+  border: 1px solid var(--gold-warm);
+  color: var(--gold-warm);
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.surah-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.surah-name-ar {
+  font-family: var(--font-arabic);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.surah-meta {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.surah-fav-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.35rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.surah-fav-btn.active {
+  color: var(--gold-warm);
+  transform: scale(1.15);
+}
+
+/* Immersive Reader Top Controls */
+.reader-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg-nav);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 12px 14px;
+  margin: -16px -16px 14px -16px;
+  border-bottom: 1px solid var(--gold-border);
+}
+
+.reader-surah-title {
+  font-family: var(--font-arabic);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+}
+
+.reader-controls-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reader-btn-pill {
+  height: 36px;
+  padding: 0 10px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.reader-btn-pill:active {
+  transform: scale(0.92);
+  background: var(--primary-emerald);
+}
+
+/* Mushaf Reading Canvas */
+.mushaf-container {
+  background: #0A2E27;
+  border-radius: var(--radius-xl);
+  border: 2px solid rgba(216, 181, 106, 0.35);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.4), var(--shadow-lg);
+  padding: 26px 20px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+[data-theme="light"] .mushaf-container {
+  background: #FCF9F2;
+  border-color: rgba(155, 121, 42, 0.35);
+  box-shadow: inset 0 0 30px rgba(216, 181, 106, 0.15), var(--shadow-sm);
+}
+
+.mushaf-header-surah-box {
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.mushaf-surah-banner {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(216, 181, 106, 0.22) 0%, rgba(216, 181, 106, 0.08) 100%);
+  border: 1px solid var(--gold-warm);
+  border-radius: var(--radius-md);
+  padding: 6px 28px;
+  font-family: var(--font-arabic);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.mushaf-bismillah {
+  text-align: center;
+  margin: 14px 0 22px 0;
+}
+
+.bismillah-ornament {
+  font-family: var(--font-arabic);
+  font-size: 1.8rem;
+  color: var(--gold-warm);
+  display: inline-block;
+}
+
+.mushaf-text-block {
+  font-family: var(--font-quran);
+  line-height: 2.3;
+  text-align: justify;
+  text-justify: amiri;
+  word-spacing: 2px;
+  color: var(--text-primary);
+}
+
+.mushaf-ayah {
+  display: inline;
+  padding: 2px 0;
+  border-radius: 4px;
+  transition: background var(--transition-fast);
+}
+
+.mushaf-ayah.active-ayah {
+  background: rgba(216, 181, 106, 0.22);
+  box-shadow: 0 0 8px rgba(216, 181, 106, 0.15);
+}
+
+.ayah-marker {
+  display: inline-block;
+  color: var(--gold-warm);
+  font-weight: 700;
+  margin: 0 4px;
+  font-size: 0.9em;
+  font-family: var(--font-ui);
+}
+
+/* Floating Reader Nav (Prev / Next) */
+.reader-navigation {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.nav-btn {
+  flex: 1;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.nav-btn:active {
+  transform: scale(0.96);
+  background: var(--primary-emerald);
+}
+
+/* ==========================================================================
+   8. Tasbeeh Screen Redesign — Tactile Ergonomic Counter
+   ========================================================================== */
+.tasbeeh-hero-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0 20px 0;
+}
+
+.tasbeeh-phrase-display-wrap {
+  text-align: center;
+  margin-bottom: 24px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+}
+
+.tasbeeh-phrase {
+  font-family: var(--font-arabic);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+  line-height: 1.4;
+  text-shadow: 0 2px 12px rgba(216, 181, 106, 0.2);
+}
+
+/* Giant Circular Counter */
+.tasbeeh-counter-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 28px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tasbeeh-progress-ring {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  position: relative;
+  box-shadow: 0 0 35px rgba(216, 181, 106, 0.18), inset 0 0 20px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.08s var(--ease-spring);
+}
+
+.tasbeeh-progress-ring:active {
+  transform: scale(0.95);
+}
+
+.ring-center {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: radial-gradient(circle, #0F453B 0%, #082823 100%);
+  border: 2px solid rgba(216, 181, 106, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="light"] .ring-center {
+  background: radial-gradient(circle, #FFFFFF 0%, #F5EFE3 100%);
+  border-color: rgba(155, 121, 42, 0.4);
+}
+
+.tasbeeh-count {
+  font-size: 4.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 4px;
+}
+
+.tasbeeh-target-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.tasbeeh-target {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+}
+
+/* Primary Tap Action Button */
+.tasbeeh-tap-btn {
+  width: 100%;
+  max-width: 290px;
+  height: 60px;
+  background: linear-gradient(135deg, var(--gold-warm) 0%, #ECC87A 100%);
+  color: var(--text-on-gold);
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: var(--font-ui);
+  font-size: 1.25rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(216, 181, 106, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto 24px auto;
+  transition: transform 0.08s var(--ease-spring), box-shadow 0.08s ease;
+}
+
+.tasbeeh-tap-btn:active, .tasbeeh-tap-btn.tap-pressed {
+  transform: scale(0.93);
+  box-shadow: 0 3px 10px rgba(216, 181, 106, 0.2);
+}
+
+/* Secondary Controls Row */
+.tasbeeh-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.control-btn {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.control-btn:active {
+  transform: scale(0.92);
+  background: var(--primary-emerald);
+  color: var(--text-primary);
+}
+
+/* Preset Phrase Carousel Pills */
+.phrase-select-list {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 2px 14px 2px;
+  scrollbar-width: none;
+}
+
+.phrase-select-list::-webkit-scrollbar {
+  display: none;
+}
+
+.phrase-option {
+  white-space: nowrap;
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
+  font-family: var(--font-arabic);
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.phrase-option.active {
+  background: var(--gold-warm);
+  color: var(--text-on-gold);
+  border-color: var(--gold-warm);
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(216, 181, 106, 0.3);
+}
+
+/* Azkar Categories Grid */
+.azkar-categories {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.azkar-category-card {
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 110px;
+}
+
+.azkar-category-icon {
+  font-size: 1.6rem;
+  margin-bottom: 6px;
+}
+
+.azkar-category-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.azkar-count-badge {
+  font-size: 0.72rem;
+  color: var(--gold-warm);
+}
+
+/* ==========================================================================
+   9. Duas Screen Redesign — Personal Library & Spiritual Sanctuary
+   ========================================================================== */
+.duas-banner-personal {
+  background: linear-gradient(135deg, #0C463C 0%, #072923 100%);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gold-warm);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.banner-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+}
+
+/* Filter Pills Row */
+.category-filter {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 14px 2px;
+  scrollbar-width: none;
+}
+
+.category-filter::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-pill {
+  white-space: nowrap;
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filter-pill.active {
+  background: var(--gold-warm);
+  color: var(--text-on-gold);
+  border-color: var(--gold-warm);
+  box-shadow: 0 2px 10px rgba(216, 181, 106, 0.25);
+}
+
+/* Dua Cards */
+.duas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dua-card {
+  padding: 18px;
+}
+
+.dua-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.dua-category-badge {
+  background: rgba(216, 181, 106, 0.12);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+}
+
+.dua-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.btn-icon:active {
+  transform: scale(0.9);
+  background: var(--primary-emerald);
+}
+
+.dua-fav-btn.active {
+  color: var(--gold-warm);
+}
+
+.dua-text {
+  font-family: var(--font-arabic);
+  font-size: 1.25rem;
+  line-height: 2;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  white-space: pre-line;
+}
+
+.dua-notes-box {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.dua-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dua-repeat-badge {
+  font-size: 0.75rem;
+  color: var(--gold-warm);
+  font-weight: 600;
+}
+
+.dua-tasbeeh-btn {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 0.78rem;
+}
+
+/* FAB Button for Adding Duas */
+.fab {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 16px);
+  left: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--gold-warm) 0%, #E2BE71 100%);
+  color: var(--text-on-gold);
+  border: none;
+  font-size: 1.8rem;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(216, 181, 106, 0.4);
+  cursor: pointer;
+  z-index: 40;
+  transition: transform var(--transition-fast);
+}
+
+[dir="ltr"] .fab {
+  left: auto;
+  right: 20px;
+}
+
+.fab:active {
+  transform: scale(0.92);
+}
+
+/* ==========================================================================
+   10. History Screen Redesign — Engaging Analytics
+   ========================================================================== */
+.history-tabs {
+  display: flex;
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  margin-bottom: 18px;
+}
+
+.tab-btn {
+  flex: 1;
+  height: 38px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tab-btn.active {
+  background: var(--gold-warm);
+  color: var(--text-on-gold);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.history-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.history-stat-card {
+  padding: 14px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon {
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  display: block;
+}
+
+.stat-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* Chart Container */
+.chart-container {
+  min-height: 160px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 20px 8px 10px 8px;
+}
+
+/* ==========================================================================
+   11. Settings Screen Redesign — Grouped iOS/Android Native Lists
+   ========================================================================== */
+.settings-group {
+  margin-bottom: 18px;
+}
+
+.settings-group-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.setting-row:last-child {
+  border-bottom: none;
+}
+
+.setting-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.setting-icon {
+  font-size: 1.25rem;
+}
+
+.setting-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: block;
+}
+
+.setting-description {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: block;
+}
+
+/* Modern iOS Style Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.15);
+  transition: 0.3s;
+  border-radius: var(--radius-full);
+}
+
+.toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #FFFFFF;
+  transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--primary-emerald);
+}
+
+input:checked + .toggle-slider::before {
+  transform: translateX(22px);
+  background-color: var(--gold-warm);
+}
+
+/* ==========================================================================
+   12. Fixed Bottom Navigation Bar — 5 Essential Primary Tabs
+   ========================================================================== */
+#bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: var(--app-max-width);
+  height: var(--bottom-nav-height);
+  background: var(--bg-nav);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid var(--gold-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 50;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  gap: 3px;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+  position: relative;
+}
+
+.nav-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  transition: transform var(--transition-fast);
+}
+
+.nav-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.nav-item.active {
+  color: var(--gold-warm);
+}
+
+.nav-item.active .nav-icon {
+  transform: translateY(-2px) scale(1.1);
+  color: var(--gold-warm);
+  filter: drop-shadow(0 2px 8px var(--gold-glow));
+}
+
+.nav-item.active::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 28px;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: var(--gold-warm);
+  box-shadow: 0 0 10px var(--gold-warm);
+}
+
+/* ==========================================================================
+   13. Form Inputs & Modal Dialogs
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn-primary {
+  background: var(--gold-warm);
+  color: var(--text-on-gold);
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  color: var(--text-primary);
+}
+
+.btn-danger {
+  background: var(--danger-bg);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+
+.textarea-input, .text-input, .select-input, .number-input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.textarea-input:focus, .text-input:focus, .select-input:focus, .number-input:focus {
+  border-color: var(--gold-warm);
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+  margin-bottom: 6px;
+}
+
+/* Modal Overlay & Bottom Sheet */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100;
+}
+
+.modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: var(--app-max-width);
+  background: var(--bg-card);
+  border-radius: 28px 28px 0 0;
+  border-top: 1px solid var(--gold-border);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+  z-index: 101;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: bottomSheetSlide 0.28s var(--ease-spring);
+}
+
+@keyframes bottomSheetSlide {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.modal-content {
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom)) 20px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.modal-header h3 {
+  font-size: 1.15rem;
+  color: var(--gold-warm);
+}
+
+/* Toast System */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: calc(100% - 32px);
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.toast {
+  background: rgba(14, 53, 46, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--gold-warm);
+  border-radius: var(--radius-full);
+  padding: 12px 20px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  animation: toastPop 0.25s var(--ease-spring);
+}
+
+@keyframes toastPop {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.toast--hiding {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.25s ease;
+}
+
+/* Accessibility & Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
