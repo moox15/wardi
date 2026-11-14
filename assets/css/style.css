@@ -216,7 +216,7 @@ body {
 #main-content {
   flex: 1;
   width: 100%;
-  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 24px);
+  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 40px);
   position: relative;
 }
 
@@ -224,9 +224,9 @@ body {
 .section {
   display: none;
   opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.25s var(--ease-smooth), transform 0.25s var(--ease-smooth);
-  padding: 16px 16px 24px 16px;
+  transform: translateY(8px);
+  transition: opacity 0.22s var(--ease-smooth), transform 0.22s var(--ease-smooth);
+  padding: 14px 16px calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 32px) 16px;
 }
 
 .section.active {
@@ -276,10 +276,15 @@ body {
 .top-bar-dates {
   display: flex;
   align-items: center;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 4px 6px;
   font-size: 0.8rem;
   color: var(--gold-warm);
   font-weight: 500;
+}
+
+.top-bar-dates span {
+  white-space: nowrap;
 }
 
 .date-dot {
@@ -1554,15 +1559,16 @@ input:checked + .toggle-slider::before {
   width: 100%;
   max-width: var(--app-max-width);
   height: var(--bottom-nav-height);
-  background: var(--bg-nav);
+  background: rgba(7, 31, 28, 0.94);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-top: 1px solid var(--gold-border);
   display: flex;
   align-items: center;
   justify-content: space-around;
-  z-index: 50;
-  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 90;
+  padding: 0 4px env(safe-area-inset-bottom) 4px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35);
 }
 
 .nav-item {
@@ -1577,20 +1583,27 @@ input:checked + .toggle-slider::before {
   color: var(--text-muted);
   cursor: pointer;
   gap: 3px;
-  transition: color var(--transition-fast), transform var(--transition-fast);
+  padding: 4px 0;
+  transition: all var(--transition-fast);
   position: relative;
 }
 
 .nav-icon {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   line-height: 1;
-  transition: transform var(--transition-fast);
+  transition: transform var(--transition-fast), color var(--transition-fast);
+  display: inline-block;
 }
 
 .nav-label {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+}
+
+.nav-item:active {
+  transform: scale(0.92);
 }
 
 .nav-item.active {
@@ -1598,16 +1611,21 @@ input:checked + .toggle-slider::before {
 }
 
 .nav-item.active .nav-icon {
-  transform: translateY(-2px) scale(1.1);
+  transform: translateY(-2px) scale(1.12);
   color: var(--gold-warm);
   filter: drop-shadow(0 2px 8px var(--gold-glow));
+}
+
+.nav-item.active .nav-label {
+  color: var(--gold-warm);
+  font-weight: 700;
 }
 
 .nav-item.active::after {
   content: "";
   position: absolute;
   top: 0;
-  width: 28px;
+  width: 22px;
   height: 3px;
   border-radius: var(--radius-full);
   background: var(--gold-warm);
@@ -1739,32 +1757,34 @@ input:checked + .toggle-slider::before {
 /* Toast System */
 .toast-container {
   position: fixed;
-  top: 20px;
+  top: 16px;
   left: 0;
   right: 0;
   margin: 0 auto;
-  z-index: 1100;
+  z-index: 1200;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 8px;
   width: calc(100% - 32px);
-  max-width: 400px;
+  max-width: 360px;
   pointer-events: none;
 }
 
 .toast {
-  background: rgba(14, 53, 46, 0.95);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--gold-warm);
+  background: rgba(10, 46, 39, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(216, 181, 106, 0.4);
   border-radius: var(--radius-full);
-  padding: 12px 20px;
+  padding: 10px 20px;
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: 0.84rem;
   font-weight: 600;
   text-align: center;
-  box-shadow: var(--shadow-lg);
-  animation: toastPop 0.25s var(--ease-spring);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 15px rgba(216, 181, 106, 0.15);
+  animation: toastPop 0.22s var(--ease-spring);
+  pointer-events: auto;
 }
 
 @keyframes toastPop {
@@ -1819,12 +1839,12 @@ input:checked + .toggle-slider::before {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: linear-gradient(135deg, rgba(216, 181, 106, 0.2), rgba(216, 181, 106, 0.08));
+  background: linear-gradient(135deg, rgba(216, 181, 106, 0.22), rgba(216, 181, 106, 0.08));
   border: 1px solid var(--gold-warm);
   color: var(--gold-champagne);
   padding: 6px 12px;
   border-radius: var(--radius-full);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -1832,31 +1852,34 @@ input:checked + .toggle-slider::before {
 }
 
 .top-bar-install-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.94);
   background: var(--gold-warm);
   color: var(--text-on-gold);
 }
 
 .pwa-banner {
-  background: linear-gradient(135deg, var(--bg-card-elevated), var(--bg-surface));
-  border: 1px solid var(--gold-border);
+  background: linear-gradient(135deg, rgba(14, 53, 46, 0.95) 0%, rgba(7, 31, 28, 0.95) 100%);
+  border: 1px solid rgba(216, 181, 106, 0.28);
   border-radius: var(--radius-lg);
   padding: 14px 16px;
-  margin-bottom: 16px;
-  box-shadow: var(--shadow-md);
+  margin-bottom: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   animation: fadeIn 0.3s ease-out;
+  position: relative;
 }
 
 .pwa-banner-content {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .pwa-banner-icon {
   font-size: 1.8rem;
   line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .pwa-banner-text {
@@ -1865,33 +1888,64 @@ input:checked + .toggle-slider::before {
 
 .pwa-banner-text strong {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+  font-weight: 700;
   color: var(--gold-warm);
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .pwa-banner-text p {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
-  line-height: 1.35;
+  line-height: 1.4;
+  margin: 0;
 }
 
 .pwa-banner-actions {
   display: flex;
-  gap: 8px;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.pwa-banner-actions #banner-install-action-btn {
+  flex: 1;
+  white-space: nowrap;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: var(--radius-pill);
+}
+
+.pwa-banner-actions #banner-install-dismiss-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pwa-banner-actions #banner-install-dismiss-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
 }
 
 /* ==========================================================================
    16. Upgrade: Personal Dashboard & Unified Worship Progress
    ========================================================================== */
 .home-hero-widget {
-  background: linear-gradient(160deg, #0e3f36 0%, #07221e 100%);
-  border: 1px solid var(--gold-border);
+  background: linear-gradient(155deg, #0e3f36 0%, #07221e 100%);
+  border: 1px solid rgba(216, 181, 106, 0.26);
   border-radius: var(--radius-xl);
-  padding: 20px 18px;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow-lg);
+  padding: 18px 18px 16px 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 25px rgba(11, 93, 75, 0.2);
   position: relative;
   overflow: hidden;
 }
@@ -1899,10 +1953,10 @@ input:checked + .toggle-slider::before {
 .home-hero-widget::before {
   content: "";
   position: absolute;
-  top: -50px;
-  left: -50px;
-  width: 130px;
-  height: 130px;
+  top: -40px;
+  left: -40px;
+  width: 120px;
+  height: 120px;
   background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
@@ -1912,64 +1966,60 @@ input:checked + .toggle-slider::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .hero-title-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .hero-badge-icon {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
 }
 
 .hero-title {
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 2px;
-}
-
-.hero-sub-meta {
-  font-size: 0.78rem;
-  color: var(--text-secondary);
+  margin: 0;
 }
 
 .hero-streak-pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: rgba(216, 181, 106, 0.15);
-  border: 1px solid var(--gold-border);
+  gap: 4px;
+  background: rgba(216, 181, 106, 0.14);
+  border: 1px solid rgba(216, 181, 106, 0.35);
   padding: 4px 10px;
   border-radius: var(--radius-full);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: var(--gold-warm);
 }
 
 .hero-gauge-container {
-  margin-bottom: 14px;
+  margin-bottom: 4px;
 }
 
 .hero-gauge-stats {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 8px;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .gauge-pct-wrap {
   display: flex;
-  align-items: baseline;
-  gap: 4px;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .gauge-pct-val {
-  font-size: 2.1rem;
-  font-weight: 800;
+  font-size: 2.2rem;
+  font-weight: 900;
   color: var(--gold-champagne);
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -1977,18 +2027,28 @@ input:checked + .toggle-slider::before {
 }
 
 .gauge-pct-label {
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   color: var(--text-muted);
   font-weight: 500;
 }
 
+.dashboard-achievement-msg {
+  flex: 1;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  text-align: left;
+  margin: 0;
+}
+
 .hero-unified-progress-bar {
-  height: 12px;
-  background: rgba(0, 0, 0, 0.35);
+  height: 10px;
+  background: rgba(0, 0, 0, 0.4);
   border-radius: var(--radius-full);
   overflow: hidden;
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 10px;
 }
 
 .hero-unified-fill {
@@ -1997,38 +2057,53 @@ input:checked + .toggle-slider::before {
   background: linear-gradient(90deg, #3EAF76 0%, #D8B56A 100%);
   border-radius: var(--radius-full);
   transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-  box-shadow: 0 0 10px rgba(216, 181, 106, 0.4);
+  box-shadow: 0 0 10px rgba(216, 181, 106, 0.45);
 }
 
-.dashboard-achievement-msg {
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  line-height: 1.4;
-  margin: 0;
-  padding-top: 4px;
+.hero-sub-meta {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-text-subtle {
+  background: transparent;
+  border: none;
+  font-size: 0.74rem;
+  color: var(--gold-warm);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 4px;
+  transition: opacity var(--transition-fast);
+}
+
+.btn-text-subtle:active {
+  opacity: 0.7;
 }
 
 /* Quick Actions Grid (8 Actions) */
 .quick-actions-section-title {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: var(--gold-warm);
   margin-bottom: 10px;
-  padding-right: 2px;
+  padding: 0 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .quick-actions-grid-8 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 22px;
 }
 
 .quick-action-tile {
   background: var(--bg-card);
   border: 1px solid var(--gold-border);
-  border-radius: var(--radius-lg);
-  padding: 12px 6px;
+  border-radius: var(--radius-md);
+  padding: 10px 4px 8px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2038,7 +2113,7 @@ input:checked + .toggle-slider::before {
   transition: all var(--transition-fast);
   color: var(--text-primary);
   text-decoration: none;
-  min-height: 80px;
+  min-height: 82px;
 }
 
 .quick-action-tile:active {
@@ -2048,36 +2123,52 @@ input:checked + .toggle-slider::before {
 }
 
 .tile-icon-wrap {
-  font-size: 1.45rem;
-  line-height: 1;
-  margin-bottom: 6px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, rgba(216, 181, 106, 0.15), rgba(11, 93, 75, 0.35));
+  border: 1px solid rgba(216, 181, 106, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: 5px;
 }
 
 .tile-label-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 .tile-title {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .tile-sub {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 /* Dashboard Summary Cards Grid (5 Cards) */
 .dashboard-summary-cards-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 22px;
 }
 
 .dash-summary-card {
@@ -2114,7 +2205,7 @@ input:checked + .toggle-slider::before {
   font-size: 1.25rem;
 }
 
-.dash-card-title {
+.dash-card-title, .dash-card-title-group strong {
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -2146,6 +2237,13 @@ input:checked + .toggle-slider::before {
 .dash-sub-label {
   font-size: 0.74rem;
   color: var(--text-muted);
+}
+
+.dash-card-hint {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0;
 }
 
 .dash-mini-progress-track {
@@ -2180,13 +2278,26 @@ input:checked + .toggle-slider::before {
   display: flex;
   align-items: center;
   gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 .dash-countdown-val {
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 700;
   color: var(--gold-warm);
   font-variant-numeric: tabular-nums;
+}
+
+.dash-card-footer {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: flex-end;
+  font-size: 0.74rem;
+  color: var(--gold-warm);
+  font-weight: 600;
 }
 
 /* Activity Timeline (نشاطي اليوم) */
@@ -2301,7 +2412,7 @@ input:checked + .toggle-slider::before {
 /* Achievements Horizontal Scroll */
 .achievements-scroll-grid {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   overflow-x: auto;
   padding-bottom: 12px;
   scrollbar-width: none;
@@ -2311,8 +2422,8 @@ input:checked + .toggle-slider::before {
 }
 
 .achievement-card {
-  min-width: 140px;
-  max-width: 150px;
+  min-width: 135px;
+  max-width: 145px;
   background: var(--bg-card);
   border: 1px solid var(--gold-border);
   border-radius: var(--radius-lg);
@@ -2372,8 +2483,8 @@ input:checked + .toggle-slider::before {
 
 .reminder-text {
   font-family: var(--font-arabic);
-  font-size: 0.98rem;
-  line-height: 1.6;
+  font-size: 1.05rem;
+  line-height: 1.7;
   color: var(--gold-champagne);
   margin-bottom: 6px;
 }
@@ -2425,14 +2536,14 @@ input:checked + .toggle-slider::before {
   gap: 6px;
 }
 
+/* Prayer Hero Countdown Card */
 .prayer-hero-widget {
-  background: linear-gradient(160deg, #0e3f36 0%, #07221e 100%);
-  border: 1px solid var(--gold-border);
+  background: linear-gradient(155deg, #0e3f36 0%, #07221e 100%);
+  border: 1px solid rgba(216, 181, 106, 0.3);
   border-radius: var(--radius-xl);
-  padding: 22px 18px;
-  text-align: center;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow-lg);
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   position: relative;
   overflow: hidden;
 }
@@ -2440,46 +2551,72 @@ input:checked + .toggle-slider::before {
 .prayer-hero-widget::after {
   content: "🕌";
   position: absolute;
-  left: 10px;
+  left: 8px;
   bottom: -15px;
   font-size: 5rem;
-  opacity: 0.08;
+  opacity: 0.07;
   pointer-events: none;
 }
 
-.next-prayer-badge {
+.prayer-hero-badge, .next-prayer-badge {
   display: inline-block;
   background: rgba(216, 181, 106, 0.15);
-  border: 1px solid var(--gold-border);
+  border: 1px solid rgba(216, 181, 106, 0.35);
   padding: 3px 12px;
   border-radius: var(--radius-full);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: var(--gold-warm);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
-.next-prayer-name {
-  font-size: 1.6rem;
-  font-weight: 800;
+.prayer-hero-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prayer-hero-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.prayer-hero-name, .next-prayer-name {
+  font-size: 1.7rem;
+  font-weight: 900;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  line-height: 1.1;
+  margin: 0;
 }
 
-.prayer-countdown-val {
-  font-size: 2.2rem;
+.prayer-hero-time {
+  font-size: 1.05rem;
+  color: var(--gold-warm);
+  font-weight: 700;
+}
+
+.prayer-countdown-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.countdown-label {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.countdown-digits, .prayer-countdown-val {
+  font-size: 1.85rem;
   font-weight: 800;
   color: var(--gold-champagne);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 1px;
-  margin: 6px 0;
+  letter-spacing: 0.5px;
 }
 
-.next-prayer-countdown p {
-  font-size: 0.76rem;
-  color: var(--text-secondary);
-}
-
-/* Prayer Times List */
+/* Prayer Times Schedule List */
 .prayer-times-container {
   display: flex;
   flex-direction: column;
@@ -2491,17 +2628,17 @@ input:checked + .toggle-slider::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 12px 14px;
   background: var(--bg-card);
   border: 1px solid var(--gold-border);
   border-radius: var(--radius-md);
-  padding: 12px 16px;
   transition: all var(--transition-fast);
 }
 
 .prayer-time-row.active-next-prayer {
   background: linear-gradient(90deg, rgba(216, 181, 106, 0.14), var(--bg-card-elevated));
   border-color: var(--gold-warm);
-  box-shadow: 0 4px 16px rgba(216, 181, 106, 0.2);
+  box-shadow: 0 4px 18px rgba(216, 181, 106, 0.18);
   transform: scale(1.01);
 }
 
@@ -2509,33 +2646,64 @@ input:checked + .toggle-slider::before {
   border-color: rgba(62, 175, 118, 0.4);
 }
 
-.prayer-row-right {
+.prayer-row-left {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.prayer-time-icon {
-  font-size: 1.3rem;
-  line-height: 1;
+.prayer-icon-bubble {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: rgba(216, 181, 106, 0.12);
+  border: 1px solid var(--gold-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
 }
 
-.prayer-time-name {
+.prayer-name-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prayer-name {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
-.prayer-time-en {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin-top: 1px;
+.prayer-status-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
 }
 
-.prayer-row-left {
+.badge-passed {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+}
+
+.badge-next {
+  background: rgba(216, 181, 106, 0.2);
+  color: var(--gold-warm);
+  border: 1px solid rgba(216, 181, 106, 0.4);
+  font-weight: 700;
+}
+
+.badge-upcoming {
+  background: rgba(62, 175, 118, 0.12);
+  color: var(--success);
+}
+
+.prayer-row-right {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .prayer-time-val {
@@ -2545,26 +2713,18 @@ input:checked + .toggle-slider::before {
   font-variant-numeric: tabular-nums;
 }
 
-.prayer-check-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2px solid var(--gold-border);
+.prayer-notify-btn {
   background: transparent;
-  color: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: none;
+  font-size: 1.1rem;
   cursor: pointer;
+  opacity: 0.6;
   transition: all var(--transition-fast);
-  font-size: 0.85rem;
 }
 
-.prayer-check-btn.checked {
-  background: var(--success);
-  border-color: var(--success);
-  color: #fff;
-  box-shadow: 0 0 10px rgba(62, 175, 118, 0.5);
+.prayer-notify-btn.active {
+  opacity: 1;
+  color: var(--gold-warm);
 }
 
 /* Prayer Tracker Block */
@@ -2572,7 +2732,7 @@ input:checked + .toggle-slider::before {
   background: var(--bg-card);
   border: 1px solid var(--gold-border);
   border-radius: var(--radius-xl);
-  padding: 18px;
+  padding: 16px 18px;
   margin-bottom: 20px;
 }
 
@@ -2587,11 +2747,13 @@ input:checked + .toggle-slider::before {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-primary);
+  display: block;
 }
 
 .tracker-sub {
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   color: var(--text-muted);
+  margin-top: 2px;
 }
 
 .tracker-progress-badge {
@@ -2612,7 +2774,7 @@ input:checked + .toggle-slider::before {
   background: rgba(0, 0, 0, 0.35);
   border-radius: var(--radius-full);
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .tracker-progress-fill {
@@ -2644,7 +2806,7 @@ input:checked + .toggle-slider::before {
 }
 
 .prayer-pill-toggle .pill-name {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -2677,23 +2839,23 @@ input:checked + .toggle-slider::before {
   grid-template-columns: repeat(7, 1fr);
   gap: 6px;
   text-align: center;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 .weekly-day-col {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .weekly-day-name {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
 }
 
 .weekly-day-date {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   color: var(--text-secondary);
 }
 
@@ -2737,19 +2899,20 @@ input:checked + .toggle-slider::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .qibla-title {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 2px;
+  display: block;
 }
 
 .qibla-sub {
   font-size: 0.74rem;
   color: var(--text-muted);
+  margin-top: 2px;
 }
 
 .qibla-degree-badge {
@@ -2766,12 +2929,12 @@ input:checked + .toggle-slider::before {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .compass-outer-ring {
-  width: 220px;
-  height: 220px;
+  width: 210px;
+  height: 210px;
   border-radius: 50%;
   background: radial-gradient(circle, #0e3b33 0%, #071f1c 100%);
   border: 2px solid var(--gold-warm);
@@ -2795,8 +2958,8 @@ input:checked + .toggle-slider::before {
 .mark-w { left: 10px; }
 
 .compass-dial {
-  width: 170px;
-  height: 170px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   position: relative;
   display: flex;
@@ -2811,7 +2974,7 @@ input:checked + .toggle-slider::before {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transform-origin: 50% 77px;
+  transform-origin: 50% 72px;
 }
 
 .kaaba-icon {
@@ -2822,7 +2985,7 @@ input:checked + .toggle-slider::before {
 .compass-needle-kaaba::after {
   content: "";
   width: 2px;
-  height: 50px;
+  height: 48px;
   background: linear-gradient(to bottom, var(--gold-warm), transparent);
   margin-top: 2px;
 }
@@ -2836,43 +2999,500 @@ input:checked + .toggle-slider::before {
 }
 
 /* ==========================================================================
-   18. Upgrade: Mobile Responsive Fine-Tuning (360px, 390px, 430px)
+   18. Upgrade: Tasbeeh Ergonomic Controls Refinement
+   ========================================================================== */
+.tasbeeh-counter-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.tasbeeh-phrase {
+  font-family: var(--font-arabic);
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+  line-height: 1.35;
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 12px rgba(216, 181, 106, 0.2);
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tasbeeh-progress-ring {
+  position: relative;
+  width: 216px;
+  height: 216px;
+  border-radius: var(--radius-full);
+  margin: 0 auto 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  box-shadow: 0 0 35px rgba(216, 181, 106, 0.18), inset 0 0 20px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.08s var(--ease-spring);
+}
+
+.tasbeeh-progress-ring:active {
+  transform: scale(0.96);
+}
+
+.tasbeeh-ring-inner, .ring-center {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: radial-gradient(circle, #0F453B 0%, #082823 100%);
+  border: 2px solid rgba(216, 181, 106, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="light"] .tasbeeh-ring-inner, [data-theme="light"] .ring-center {
+  background: radial-gradient(circle, #FFFFFF 0%, #F5EFE3 100%);
+  border-color: rgba(155, 121, 42, 0.4);
+}
+
+.tasbeeh-count {
+  font-size: 4.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 2px;
+  transition: transform 0.06s var(--ease-smooth);
+}
+
+.tasbeeh-target-hint, .tasbeeh-target-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.tasbeeh-target {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+  font-variant-numeric: tabular-nums;
+}
+
+.tasbeeh-tap-action-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.tasbeeh-tap-btn {
+  width: 100%;
+  max-width: 300px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--gold-warm) 0%, #E9C97C 100%);
+  color: var(--text-on-gold);
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: var(--font-ui);
+  font-size: 1.18rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(216, 181, 106, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: transform 0.08s var(--ease-spring), box-shadow 0.08s ease;
+}
+
+.tasbeeh-tap-btn:active, .tasbeeh-tap-btn.tap-pressed {
+  transform: scale(0.93);
+  box-shadow: 0 2px 8px rgba(216, 181, 106, 0.2);
+}
+
+.tasbeeh-controls-row, .tasbeeh-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 20px auto;
+}
+
+.control-btn {
+  flex: 1;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+  white-space: nowrap;
+}
+
+.control-btn:active {
+  transform: scale(0.92);
+  background: var(--primary-emerald);
+  color: var(--text-primary);
+}
+
+.phrase-selection-block {
+  width: 100%;
+  margin-bottom: 18px;
+}
+
+.phrase-header-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+
+.phrase-select-list {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 10px 2px;
+  scrollbar-width: none;
+}
+.phrase-select-list::-webkit-scrollbar {
+  display: none;
+}
+
+.phrase-option {
+  white-space: nowrap;
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-full);
+  padding: 7px 16px;
+  font-family: var(--font-arabic);
+  font-size: 1rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.phrase-option.active {
+  background: var(--gold-warm);
+  color: var(--text-on-gold);
+  border-color: var(--gold-warm);
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(216, 181, 106, 0.3);
+}
+
+.custom-phrase-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.custom-phrase-row input {
+  height: 42px;
+}
+
+.tasbeeh-stats-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 16px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.stats-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.recent-sessions-block {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* ==========================================================================
+   19. Upgrade: History & Analytics Layout Refinement
+   ========================================================================== */
+.history-metric-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.metric-card {
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.metric-icon {
+  font-size: 1.4rem;
+}
+
+.metric-value-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.metric-number {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.period-tabs-nav {
+  display: flex;
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  margin-bottom: 18px;
+}
+
+.period-tab {
+  flex: 1;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.period-tab.active {
+  background: var(--gold-warm);
+  color: var(--text-on-gold);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.chart-card {
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.chart-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+  margin-bottom: 14px;
+}
+
+.chart-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 16px;
+  text-align: center;
+  gap: 8px;
+}
+
+.chart-empty-icon {
+  font-size: 2.2rem;
+  opacity: 0.7;
+}
+
+.chart-empty-text {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  max-width: 260px;
+  line-height: 1.45;
+}
+
+.history-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  height: 160px;
+  padding: 10px 4px 0 4px;
+  width: 100%;
+}
+
+.chart-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  max-width: 44px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.chart-bar-val {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-bar-track {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.chart-bar-fill {
+  width: 100%;
+  background: linear-gradient(180deg, var(--gold-warm) 0%, #0B5D4B 100%);
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+  transition: height 0.4s var(--ease-spring);
+}
+
+.chart-bar-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  white-space: nowrap;
+}
+
+.personal-records-card {
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.records-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+}
+
+.records-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.record-row, .record-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.record-row:last-child, .record-item:last-child {
+  border-bottom: none;
+}
+
+.record-name, .record-label {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}
+
+.record-val, .record-value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--gold-warm);
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-feed-card {
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.activity-feed-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   20. Upgrade: Mobile Responsive Fine-Tuning (360px, 390px, 430px)
    ========================================================================== */
 @media (max-width: 375px) {
+  .top-bar-greeting {
+    font-size: 1.12rem;
+  }
+  .top-bar-dates {
+    font-size: 0.72rem;
+    gap: 3px 5px;
+  }
   .quick-actions-grid-8 {
     gap: 6px;
   }
   .quick-action-tile {
-    padding: 10px 4px;
+    padding: 8px 3px 6px 3px;
     min-height: 74px;
   }
   .tile-icon-wrap {
-    font-size: 1.25rem;
+    width: 32px;
+    height: 32px;
+    font-size: 1.15rem;
+    margin-bottom: 3px;
   }
   .tile-title {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
   }
   .tile-sub {
-    font-size: 0.6rem;
+    font-size: 0.58rem;
   }
   .gauge-pct-val {
-    font-size: 1.8rem;
+    font-size: 1.85rem;
   }
-  .compass-outer-ring {
+  .tasbeeh-progress-ring {
     width: 190px;
     height: 190px;
   }
+  .tasbeeh-count {
+    font-size: 3.8rem;
+  }
+  .compass-outer-ring {
+    width: 185px;
+    height: 185px;
+  }
   .compass-dial {
-    width: 150px;
-    height: 150px;
+    width: 140px;
+    height: 140px;
   }
   .compass-needle-kaaba {
-    transform-origin: 50% 67px;
+    transform-origin: 50% 63px;
   }
   .nav-label {
     font-size: 0.66rem;
   }
   .nav-icon {
-    font-size: 1.2rem;
+    font-size: 1.18rem;
   }
 }
+

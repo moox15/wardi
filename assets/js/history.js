@@ -329,18 +329,25 @@ class HistoryManager {
       // Records
       const records = await this.getRecords();
       const recordsList = document.getElementById('history-records-list');
-      if (recordsList) {
-        const lang = document.body.getAttribute('data-lang') || 'ar';
-        const labels = lang === 'ar'
-          ? { bestT: 'أعلى تسبيح يومي', bestQ: 'أكثر صفحات قرآن', streak: 'أطول سلسلة' }
-          : { bestT: 'Best Daily Tasbeeh', bestQ: 'Most Quran Pages', streak: 'Longest Streak' };
+      const lang = document.body.getAttribute('data-lang') || 'ar';
+      const labels = lang === 'ar'
+        ? { bestT: 'أعلى تسبيح يومي', bestQ: 'أكثر صفحات قرآن', streak: 'أطول سلسلة متصلة' }
+        : { bestT: 'Best Daily Tasbeeh', bestQ: 'Most Quran Pages', streak: 'Longest Streak' };
 
+      if (recordsList) {
         recordsList.innerHTML = `
-          <div class="record-item"><span class="record-label">${labels.bestT}</span><span class="record-value">${records.bestTasbeeh.toLocaleString()}</span></div>
-          <div class="record-item"><span class="record-label">${labels.bestQ}</span><span class="record-value">${records.bestQuran.toLocaleString()}</span></div>
-          <div class="record-item"><span class="record-label">${labels.streak}</span><span class="record-value">${records.longestStreak}</span></div>
+          <div class="record-row"><span class="record-name">${labels.bestT}</span><span class="record-val">${records.bestTasbeeh.toLocaleString()}</span></div>
+          <div class="record-row"><span class="record-name">${labels.bestQ}</span><span class="record-val">${records.bestQuran.toLocaleString()}</span></div>
+          <div class="record-row"><span class="record-name">${labels.streak}</span><span class="record-val">${records.longestStreak}</span></div>
         `;
       }
+
+      const bestT = document.getElementById('record-best-tasbeeh');
+      const bestQ = document.getElementById('record-best-quran');
+      const streakR = document.getElementById('record-best-streak');
+      if (bestT) bestT.textContent = records.bestTasbeeh.toLocaleString();
+      if (bestQ) bestQ.textContent = records.bestQuran.toLocaleString();
+      if (streakR) streakR.textContent = records.longestStreak;
 
       // Activity feed
       await this.renderActivityFeed();
@@ -360,34 +367,35 @@ class HistoryManager {
     // Compute combined value for each day
     const bars = data.map(d => ({
       label: d.date ? d.date.slice(5) : '', // MM-DD
-      value: (d.tasbeehCount || 0) + (d.quranPages || 0) + (d.azkarCompleted || 0) + (d.duasRead || 0)
+      value: (d.tasbeehCount || 0) + (d.quranPages || 0) + (d.azkarCompleted || 0) + (d.duasRead || 0) + (d.prayersCompleted || 0)
     }));
 
-    const maxVal = Math.max(...bars.map(b => b.value), 1);
+    const hasActivity = bars.some(b => b.value > 0);
 
-    // Determine how many bars to show — if there are many, shorten labels
+    if (!hasActivity) {
+      container.innerHTML = `
+        <div class="chart-empty-state">
+          <span class="chart-empty-icon">📈</span>
+          <p class="chart-empty-text">ابدأ أورادك اليوم (صلاة، تسبيح، قرآن) لترى إحصاءاتك البيانية هنا</p>
+        </div>
+      `;
+      return;
+    }
+
+    const maxVal = Math.max(...bars.map(b => b.value), 1);
     const showLabel = bars.length <= 14;
 
     container.innerHTML = `
-      <div class="history-chart" style="
-        display:flex; align-items:flex-end; justify-content:center;
-        gap:${bars.length > 14 ? '2' : '6'}px; height:180px; padding:12px 4px 0;
-        width:100%; overflow-x:auto;
-      ">
+      <div class="history-chart">
         ${bars.map(b => {
-          const pct = Math.max((b.value / maxVal) * 100, 2);
+          const pct = Math.max((b.value / maxVal) * 100, 3);
           return `
-            <div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:${bars.length > 14 ? '8' : '20'}px;max-width:48px;">
-              <span style="font-size:10px;color:var(--text-secondary);margin-bottom:4px;">${b.value > 0 ? b.value : ''}</span>
-              <div style="
-                width:100%;
-                height:${pct}%;
-                background:linear-gradient(180deg, var(--accent) 0%, var(--accent-hover, #e0c47e) 100%);
-                border-radius:4px 4px 0 0;
-                min-height:3px;
-                transition:height 0.4s ease;
-              "></div>
-              ${showLabel ? `<span style="font-size:9px;color:var(--text-muted);margin-top:4px;white-space:nowrap;">${b.label}</span>` : ''}
+            <div class="chart-bar-col" style="min-width:${bars.length > 14 ? '10' : '24'}px;">
+              <span class="chart-bar-val">${b.value > 0 ? b.value : ''}</span>
+              <div class="chart-bar-track">
+                <div class="chart-bar-fill" style="height:${pct}%;"></div>
+              </div>
+              ${showLabel ? `<span class="chart-bar-label">${b.label}</span>` : ''}
             </div>`;
         }).join('')}
       </div>
@@ -398,7 +406,7 @@ class HistoryManager {
    * Render the recent activity feed into #history-activity-list.
    */
   async renderActivityFeed() {
-    const container = document.getElementById('history-activity-list');
+    const container = document.getElementById('history-activity-list') || document.getElementById('history-feed-list');
     if (!container) return;
 
     try {

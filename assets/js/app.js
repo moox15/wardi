@@ -330,7 +330,7 @@ class App {
       if (headerInstallBtn) headerInstallBtn.style.display = 'inline-flex';
       if (settingsInstallBtn) settingsInstallBtn.style.display = 'flex';
       if (installBanner && !sessionStorage.getItem('wardi_pwa_banner_dismissed')) {
-        installBanner.style.display = 'flex';
+        installBanner.style.display = 'block';
       }
     });
 
@@ -995,6 +995,11 @@ class App {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
+    // Clear previous toasts to prevent overlapping stacks
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+
     const toast = document.createElement('div');
     toast.className = `toast toast--${type}`;
     toast.textContent = message;
@@ -1002,8 +1007,8 @@ class App {
 
     setTimeout(() => {
       toast.classList.add('toast--hiding');
-      setTimeout(() => toast.remove(), 280);
-    }, 3200);
+      setTimeout(() => toast.remove(), 260);
+    }, 2600);
   }
 
   _escapeHTML(str) {

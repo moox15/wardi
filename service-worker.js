@@ -4,7 +4,7 @@
  * Fully compatible with GitHub Pages subpath deployments.
  */
 
-const CACHE_NAME = 'wardi-pro-v4';
+const CACHE_NAME = 'wardi-pro-v5';
 
 // Essential App Shell assets
 const PRECACHE_ASSETS = [

@@ -146,11 +146,12 @@ async function main() {
   await send('Runtime.enable');
   await send('DOM.enable');
 
-  console.log('\n--- STARTING AUTOMATED TEST SUITE ---');
+  console.log('\n--- STARTING AUTOMATED TEST & SCREENSHOT SUITE ---');
   const results = [];
 
   // Wait for app initialization (2s)
   await new Promise(r => setTimeout(r, 2000));
+  await setViewport(390, 844);
 
   // TEST 1: Service Worker Registration & PWA Manifest
   try {
@@ -180,15 +181,13 @@ async function main() {
     results.push({ name: 'PWA Service Worker & Manifest', passed: false, error: err.message });
   }
 
-  // TEST 2: Dua Management CRUD & Validation
+  // TEST 2: Dua Management CRUD & Modal
   try {
-    // 2a. Navigate to duas section
     await evaluate(`window.app.navigateTo('duas');`);
     await new Promise(r => setTimeout(r, 400));
     
-    // Check initial duas loaded
-    const initialDuasCount = await evaluate(`document.querySelectorAll('.dua-card').length`);
-    console.log('Initial Dua cards in DOM:', initialDuasCount);
+    // Save screenshot of Duas screen
+    await saveScreenshot('test_duas_section_390.png');
 
     // Open add modal
     await evaluate(`window.duasManager.openModal();`);
@@ -209,12 +208,9 @@ async function main() {
       };
     })()`);
     console.log('✓ Dua modal display & stacking context:', modalCheck);
-
-    // Save screenshot of open modal
-    await setViewport(390, 844);
     await saveScreenshot('test_dua_modal_open_390.png');
 
-    // 2b. Test validation: try saving with empty text
+    // Validation check on empty submit
     const validationCheck = await evaluate(`(() => {
       document.getElementById('dua-text-input').value = '';
       window.duasManager.saveDuaFromModal();
@@ -226,7 +222,7 @@ async function main() {
     })()`);
     console.log('✓ Validation check on empty submit:', validationCheck);
 
-    // 2c. Add a valid dua
+    // Add a valid dua
     const testDuaText = 'اللهم إنا نسألك من الخير كله عاجله وآجله ما علمنا منه وما لم نعلم (اختبار آلي)';
     await evaluate(`
       document.getElementById('dua-text-input').value = ${JSON.stringify(testDuaText)};
@@ -236,7 +232,6 @@ async function main() {
     `);
     await new Promise(r => setTimeout(r, 600));
 
-    // Verify it is saved in IndexedDB and in DOM
     const afterAdd = await evaluate(`(async () => {
       const allDuas = await window.storage.getAllItems('duas');
       const domCards = Array.from(document.querySelectorAll('.dua-card'));
@@ -250,7 +245,7 @@ async function main() {
     })()`);
     console.log('✓ Added Dua persistence verified:', afterAdd);
 
-    // 2d. Edit the dua
+    // Edit the dua
     const createdId = afterAdd.dbId;
     await evaluate(`window.duasManager.openModal(${createdId});`);
     await new Promise(r => setTimeout(r, 300));
@@ -266,7 +261,7 @@ async function main() {
     })()`);
     console.log('✓ Edited Dua verified:', afterEdit);
 
-    // 2e. Delete the dua (simulate confirm)
+    // Delete the dua (simulate confirm)
     await evaluate(`
       window.confirm = () => true;
       window.duasManager.deleteDua(${createdId});
@@ -329,7 +324,6 @@ async function main() {
     })()`);
     console.log('✓ Prayer toggle (Fajr) verified in DB:', toggleResult);
 
-    await setViewport(390, 844);
     await saveScreenshot('test_prayer_section_390.png');
 
     results.push({
@@ -342,10 +336,82 @@ async function main() {
     results.push({ name: 'Prayer Engine & Tracking', passed: false, error: err.message });
   }
 
-  // TEST 4: Personal Dashboard (Home Section)
+  // TEST 4: Tasbeeh Section UI Refinement
+  try {
+    await evaluate(`window.app.navigateTo('tasbeeh');`);
+    await new Promise(r => setTimeout(r, 500));
+
+    // Tap 3 times to see counter increase smoothly
+    await evaluate(`
+      window.tasbeehManager.increment();
+      window.tasbeehManager.increment();
+      window.tasbeehManager.increment();
+    `);
+    await new Promise(r => setTimeout(r, 300));
+
+    const tasbeehData = await evaluate(`(() => {
+      const countEl = document.getElementById('tasbeeh-count-display');
+      const tapBtn = document.getElementById('tasbeeh-increment-btn');
+      const controlsRow = document.querySelector('.tasbeeh-controls-row');
+      const phraseList = document.querySelector('.phrase-select-list');
+      const statsCard = document.querySelector('.tasbeeh-stats-card');
+
+      return {
+        currentCount: countEl ? countEl.innerText : null,
+        tapBtnExists: !!tapBtn,
+        controlsRowExists: !!controlsRow,
+        phraseListExists: !!phraseList,
+        statsCardExists: !!statsCard
+      };
+    })()`);
+    console.log('✓ Tasbeeh section verified:', tasbeehData);
+
+    await saveScreenshot('test_tasbeeh_section_390.png');
+
+    results.push({
+      name: 'Tasbeeh Ergonomic Controls & UI',
+      passed: tasbeehData.currentCount === '3' && tasbeehData.tapBtnExists && tasbeehData.controlsRowExists,
+      details: tasbeehData
+    });
+  } catch (err) {
+    console.error('✗ TEST 4 (Tasbeeh) Failed:', err);
+    results.push({ name: 'Tasbeeh Ergonomic Controls & UI', passed: false, error: err.message });
+  }
+
+  // TEST 5: Statistics & History Section UI Refinement
+  try {
+    await evaluate(`window.app.navigateTo('history');`);
+    await new Promise(r => setTimeout(r, 500));
+
+    const historyData = await evaluate(`(() => {
+      const metricCards = document.querySelectorAll('.metric-card');
+      const chartContainer = document.getElementById('history-chart-container');
+      const recordsRows = document.querySelectorAll('.record-row, .record-item');
+
+      return {
+        metricCardsCount: metricCards.length,
+        hasChartOrEmptyState: chartContainer ? chartContainer.children.length > 0 : false,
+        recordsRowsCount: recordsRows.length
+      };
+    })()`);
+    console.log('✓ History section verified:', historyData);
+
+    await saveScreenshot('test_history_section_390.png');
+
+    results.push({
+      name: 'Statistics & History UI Refinement',
+      passed: historyData.metricCardsCount === 3 && historyData.hasChartOrEmptyState && historyData.recordsRowsCount >= 3,
+      details: historyData
+    });
+  } catch (err) {
+    console.error('✗ TEST 5 (History) Failed:', err);
+    results.push({ name: 'Statistics & History UI Refinement', passed: false, error: err.message });
+  }
+
+  // TEST 6: Personal Dashboard (Home Section)
   try {
     await evaluate(`window.app.navigateTo('home');`);
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 600));
 
     const dashData = await evaluate(`(() => {
       const overallPct = document.getElementById('dashboard-overall-pct');
@@ -368,7 +434,6 @@ async function main() {
     })()`);
     console.log('✓ Dashboard elements verified:', dashData);
 
-    await setViewport(390, 844);
     await saveScreenshot('test_dashboard_390.png');
 
     results.push({
@@ -377,15 +442,15 @@ async function main() {
       details: dashData
     });
   } catch (err) {
-    console.error('✗ TEST 4 Failed:', err);
+    console.error('✗ TEST 6 Failed:', err);
     results.push({ name: 'Comprehensive Personal Dashboard', passed: false, error: err.message });
   }
 
-  // TEST 5: Responsive Check (360px, 390px, 430px)
+  // TEST 7: Responsive Check (360px, 390px, 430px)
   try {
     const responsiveResults = {};
     for (const width of [360, 390, 430]) {
-      await setViewport(width, 800);
+      await setViewport(width, 844);
       await new Promise(r => setTimeout(r, 200));
       const overflow = await evaluate(`(() => {
         const html = document.documentElement;
@@ -407,7 +472,7 @@ async function main() {
       details: responsiveResults
     });
   } catch (err) {
-    console.error('✗ TEST 5 Failed:', err);
+    console.error('✗ TEST 7 Failed:', err);
     results.push({ name: 'Mobile Responsive Overflow Check', passed: false, error: err.message });
   }
 
