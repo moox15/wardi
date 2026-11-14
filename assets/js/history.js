@@ -59,6 +59,9 @@ class HistoryManager {
         case 'dua':
           await this.updateDailyStats('duasRead', details.count || 1);
           break;
+        case 'prayer':
+          await this.updateDailyStats('prayersCompleted', details.count || 1);
+          break;
       }
     } catch (err) {
       console.error('logActivity error:', err);
@@ -68,7 +71,7 @@ class HistoryManager {
   /**
    * Increment a stat field for today's daily_stats record.
    * Creates the record if it doesn't exist.
-   * @param {string} field  One of: tasbeehCount, quranPages, azkarCompleted, duasRead
+   * @param {string} field  One of: tasbeehCount, quranPages, azkarCompleted, duasRead, prayersCompleted
    * @param {number} value  Amount to add
    */
   async updateDailyStats(field, value) {
@@ -82,7 +85,8 @@ class HistoryManager {
           tasbeehCount: 0,
           quranPages: 0,
           azkarCompleted: 0,
-          duasRead: 0
+          duasRead: 0,
+          prayersCompleted: 0
         };
       }
 

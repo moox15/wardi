@@ -388,17 +388,38 @@ class DuasManager {
     this.openModal();
   }
 
-  openModal() {
+  openModal(duaOrId) {
+    if (duaOrId) {
+      if (typeof duaOrId === 'object') {
+        this.showEditModal(duaOrId);
+        return;
+      }
+      const found = this.allDuas.find(d => d.id === duaOrId);
+      if (found) {
+        this.showEditModal(found);
+        return;
+      }
+    }
     const modal = document.getElementById('dua-modal');
     const overlay = document.getElementById('modal-overlay');
     if (modal) {
       modal.style.display = 'block';
       modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
     }
     if (overlay) {
       overlay.style.display = 'block';
       overlay.classList.add('active');
+      overlay.setAttribute('aria-hidden', 'false');
     }
+    // Auto-focus input
+    setTimeout(() => {
+      const textInput = document.getElementById('dua-text-input');
+      if (textInput) {
+        textInput.focus();
+        textInput.classList.remove('input-error');
+      }
+    }, 120);
   }
 
   closeModal() {
@@ -407,11 +428,15 @@ class DuasManager {
     if (modal) {
       modal.style.display = 'none';
       modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
     }
     if (overlay) {
       overlay.style.display = 'none';
       overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
     }
+    const textInput = document.getElementById('dua-text-input');
+    if (textInput) textInput.classList.remove('input-error');
     this.editingDuaId = null;
   }
 
@@ -423,15 +448,19 @@ class DuasManager {
 
     const text = (textInput?.value || '').trim();
     if (!text) {
+      if (textInput) {
+        textInput.classList.add('input-error');
+        textInput.focus();
+      }
       if (window.WardApp) {
-        window.WardApp.showToast('يرجى كتابة نص الدعاء', 'error');
+        window.WardApp.showToast('يرجى كتابة نص الدعاء المبارك أولاً', 'error');
       }
       return;
     }
 
     const categoryKey = catSelect?.value || 'personal';
     const notes = (notesInput?.value || '').trim();
-    const repetition = parseInt(repInput?.value) || 1;
+    const repetition = Math.max(1, parseInt(repInput?.value) || 1);
 
     try {
       if (this.editingDuaId) {
@@ -446,7 +475,7 @@ class DuasManager {
           updatedAt: new Date().toISOString()
         };
         await this.storage.updateItem('duas', updated);
-        if (window.WardApp) window.WardApp.showToast('تم تحديث الدعاء بنجاح');
+        if (window.WardApp) window.WardApp.showToast('تم حفظ تعديل الدعاء بنجاح ✨');
       } else {
         // Create new
         const newDua = {
@@ -459,7 +488,7 @@ class DuasManager {
           updatedAt: new Date().toISOString()
         };
         await this.storage.addItem('duas', newDua);
-        if (window.WardApp) window.WardApp.showToast('تمت إضافة الدعاء بنجاح');
+        if (window.WardApp) window.WardApp.showToast('تمت إضافة الدعاء إلى قائمتك بنجاح 🤲');
       }
 
       this.closeModal();
@@ -467,19 +496,24 @@ class DuasManager {
 
       // Log in history
       if (window.WardApp && window.WardApp.history) {
-        window.WardApp.history.logActivity('dua', {
-          description: `حفظ دعاء: ${text.substring(0, 30)}...`
+        await window.WardApp.history.logActivity('dua', {
+          description: `حفظ دعاء: ${text.substring(0, 32)}...`
         });
+      }
+
+      // Update dashboard
+      if (window.WardApp && typeof window.WardApp.updateDashboard === 'function') {
+        await window.WardApp.updateDashboard();
       }
     } catch (err) {
       console.error('saveDua error:', err);
-      if (window.WardApp) window.WardApp.showToast('تعذر حفظ الدعاء', 'error');
+      if (window.WardApp) window.WardApp.showToast('تعذر حفظ الدعاء في الذاكرة المحلية', 'error');
     }
   }
 
   async deleteDua(id) {
     const lang = window.WardApp?.currentLang || 'ar';
-    const msg = lang === 'ar' ? 'هل أنت متأكد من حذف هذا الدعاء نهائيًا؟' : 'Are you sure you want to delete this dua?';
+    const msg = lang === 'ar' ? 'هل أنت متأكد من رغبتك في حذف هذا الدعاء نهائياً؟' : 'Are you sure you want to delete this dua?';
     if (!confirm(msg)) return;
 
     try {
@@ -487,10 +521,14 @@ class DuasManager {
       this.closeModal();
       await this.loadDuas();
       if (window.WardApp) {
-        window.WardApp.showToast(lang === 'ar' ? 'تم حذف الدعاء' : 'Dua deleted');
+        window.WardApp.showToast(lang === 'ar' ? 'تم حذف الدعاء بنجاح 🗑️' : 'Dua deleted');
+        if (typeof window.WardApp.updateDashboard === 'function') {
+          await window.WardApp.updateDashboard();
+        }
       }
     } catch (err) {
       console.error('deleteDua error:', err);
+      if (window.WardApp) window.WardApp.showToast('تعذر حذف الدعاء', 'error');
     }
   }
 
@@ -584,15 +622,20 @@ class DuasManager {
       saveBtn.addEventListener('click', () => this.saveDuaFromModal());
     }
 
-    // Cancel modal buttons
-    document.querySelectorAll('#dua-cancel-btn').forEach(btn => {
-      btn.addEventListener('click', () => this.closeModal());
+    // Cancel / close modal buttons (handles both header close button and footer cancel button)
+    document.querySelectorAll('.dua-close-modal, #dua-cancel-btn, #dua-close-modal-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.closeModal();
+      });
     });
 
     // Delete modal button
     const deleteBtn = document.getElementById('dua-delete-btn');
     if (deleteBtn) {
-      deleteBtn.addEventListener('click', () => {
+      deleteBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         if (this.editingDuaId) this.deleteDua(this.editingDuaId);
       });
     }
@@ -602,6 +645,16 @@ class DuasManager {
     if (overlay) {
       overlay.addEventListener('click', () => this.closeModal());
     }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('dua-modal');
+        if (modal && modal.style.display !== 'none') {
+          this.closeModal();
+        }
+      }
+    });
   }
 }
 

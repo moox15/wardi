@@ -7,7 +7,7 @@ class StorageManager {
   constructor() {
     this.db = null;
     this.DB_NAME = 'WardiDB';
-    this.DB_VERSION = 1;
+    this.DB_VERSION = 2;
     this.STORE_NAMES = [
       'duas',
       'tasbeeh_sessions',
@@ -15,7 +15,10 @@ class StorageManager {
       'quran_favorites',
       'quran_cache',
       'history_log',
-      'daily_stats'
+      'daily_stats',
+      'prayer_records',
+      'achievements',
+      'dashboard_prefs'
     ];
   }
 
@@ -72,6 +75,23 @@ class StorageManager {
         if (!db.objectStoreNames.contains('daily_stats')) {
           const statsStore = db.createObjectStore('daily_stats', { keyPath: 'date' });
           statsStore.createIndex('date', 'date', { unique: true });
+        }
+
+        // prayer_records — daily prayer tracking (keyPath: date 'YYYY-MM-DD')
+        if (!db.objectStoreNames.contains('prayer_records')) {
+          const prayerStore = db.createObjectStore('prayer_records', { keyPath: 'date' });
+          prayerStore.createIndex('date', 'date', { unique: true });
+        }
+
+        // achievements — unlocked milestones and badges
+        if (!db.objectStoreNames.contains('achievements')) {
+          const achStore = db.createObjectStore('achievements', { keyPath: 'id' });
+          achStore.createIndex('category', 'category', { unique: false });
+        }
+
+        // dashboard_prefs — personalized layout and target settings
+        if (!db.objectStoreNames.contains('dashboard_prefs')) {
+          db.createObjectStore('dashboard_prefs', { keyPath: 'key' });
         }
       };
 
@@ -394,6 +414,82 @@ class StorageManager {
     } catch (err) {
       console.error('Clear all data failed:', err);
       throw err;
+    }
+  }
+  /* ------------------------------------------------------------------ */
+  /*  Specialized Prayer & Activity Helpers                             */
+  /* ------------------------------------------------------------------ */
+
+  /**
+   * Get prayer record for a specific date (defaults to today).
+   * @param {string} [dateStr] 'YYYY-MM-DD'
+   * @returns {Promise<object>}
+   */
+  async getPrayerRecord(dateStr) {
+    const d = dateStr || new Date().toISOString().split('T')[0];
+    const rec = await this.getItem('prayer_records', d);
+    if (rec) return rec;
+    return {
+      date: d,
+      fajr: false,
+      dhuhr: false,
+      asr: false,
+      maghrib: false,
+      isha: false,
+      fajrTime: null,
+      dhuhrTime: null,
+      asrTime: null,
+      maghribTime: null,
+      ishaTime: null,
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  /**
+   * Save or update prayer record for a date.
+   * @param {object} record
+   * @returns {Promise<void>}
+   */
+  async savePrayerRecord(record) {
+    record.updatedAt = new Date().toISOString();
+    return this.updateItem('prayer_records', record);
+  }
+
+  /**
+   * Retrieve prayer records for the last N days.
+   * @param {number} days
+   * @returns {Promise<object[]>}
+   */
+  async getRecentPrayerRecords(days = 7) {
+    try {
+      const all = await this.getAllItems('prayer_records');
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - (days - 1));
+      const cutoffStr = cutoff.toISOString().split('T')[0];
+      return all
+        .filter(r => r.date >= cutoffStr)
+        .sort((a, b) => a.date.localeCompare(b.date));
+    } catch (err) {
+      console.error('getRecentPrayerRecords error:', err);
+      return [];
+    }
+  }
+
+  /**
+   * Get all activities logged today.
+   * @param {string} [dateStr]
+   * @returns {Promise<object[]>}
+   */
+  async getTodayActivities(dateStr) {
+    try {
+      const targetDate = dateStr || new Date().toISOString().split('T')[0];
+      const all = await this.getAllItems('history_log');
+      return all
+        .filter(item => item.date === targetDate || (item.timestamp && item.timestamp.startsWith(targetDate)))
+        .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+    } catch (err) {
+      console.error('getTodayActivities error:', err);
+      return [];
     }
   }
 }

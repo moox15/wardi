@@ -1,0 +1,5 @@
+temp_edge_profile/
+scripts/temp_edge_profile/
+*.log
+.DS_Store
+Thumbs.db

@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="وِرْدي">
-  <meta name="description" content="وِرْدي برو — رفيقك الإسلامي اليومي لتلاوة القرآن والأذكار والأدعية وحفظ الأوراد">
+  <meta name="description" content="وِرْدي برو — رفيقك الإسلامي اليومي لتلاوة القرآن والصلوات والأذكار والأدعية وحفظ الأوراد">
   <meta name="mobile-web-app-capable" content="yes">
   <title>وِرْدي | Wardi Pro</title>
 
@@ -23,6 +23,21 @@
 
   <!-- Mobile-First Luxury Stylesheet -->
   <link rel="stylesheet" href="./assets/css/style.css">
+
+  <!-- Early Service Worker Registration Script with Error Handling -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+          .then(function(reg) {
+            console.log('[Wardi PWA] Service Worker registered successfully with scope:', reg.scope);
+          })
+          .catch(function(err) {
+            console.error('[Wardi PWA] Service Worker registration failed:', err);
+          });
+      });
+    }
+  </script>
 </head>
 <body data-theme="dark" data-lang="ar">
 
@@ -44,94 +59,113 @@
     <main id="main-content" role="main">
 
       <!-- ======================================== -->
-      <!-- 1. HOME SCREEN SECTION                   -->
+      <!-- 1. COMPREHENSIVE PERSONAL DASHBOARD       -->
       <!-- ======================================== -->
       <section id="home-section" class="section active" aria-label="الرئيسية">
 
         <!-- Mobile Top App Bar -->
         <header class="mobile-top-bar">
           <div class="top-bar-user-info">
-            <h2 id="greeting-text" class="top-bar-greeting">السلام عليكم 🌙</h2>
+            <h2 id="greeting-text" class="top-bar-greeting">السلام عليكم 🌿</h2>
             <div class="top-bar-dates">
               <span id="hijri-date">--</span>
               <span class="date-dot">•</span>
               <span id="gregorian-date">--</span>
             </div>
           </div>
-          <button id="open-settings-btn" class="top-bar-action-btn" aria-label="الإعدادات" title="الإعدادات">
-            ⚙️
-          </button>
+          <div class="top-bar-actions-group">
+            <button id="header-install-btn" class="top-bar-install-btn" style="display:none;" aria-label="تثبيت التطبيق" title="تثبيت وِرْدي كبرنامج على هاتفك">
+              <span>📲</span>
+              <span>تثبيت</span>
+            </button>
+            <button id="open-settings-btn" class="top-bar-action-btn" aria-label="الإعدادات" title="الإعدادات">
+              ⚙️
+            </button>
+          </div>
         </header>
 
-        <!-- Main Hero: Worship Ring & Daily Progress -->
+        <!-- In-App PWA Install Banner -->
+        <div id="pwa-install-banner" class="pwa-banner card" style="display:none;">
+          <div class="pwa-banner-content">
+            <span class="pwa-banner-icon">🕌</span>
+            <div class="pwa-banner-text">
+              <strong>تثبيت وِرْدي على هاتفك</strong>
+              <p>للوصول السريع بدون إنترنت بنقرة واحدة من شاشتك الرئيسية</p>
+            </div>
+          </div>
+          <div class="pwa-banner-actions">
+            <button id="banner-install-action-btn" class="btn btn-sm btn-primary">تثبيت الآن</button>
+            <button id="banner-install-dismiss-btn" class="btn-icon" aria-label="إغلاق">✕</button>
+          </div>
+        </div>
+
+        <!-- Main Hero: Unified Daily Progress Gauge & Streaks -->
         <div class="home-hero-widget pattern-bg">
           <div class="hero-header-row">
             <div class="hero-title-wrap">
               <span class="hero-badge-icon">✨</span>
-              <span class="hero-title">وِرد اليوم</span>
+              <span class="hero-title">لوحة وِرد اليوم</span>
             </div>
-            <div class="hero-streak-pill">
+            <div class="hero-streak-pill" title="سلسلة المحافظة على الوِرد">
               <span>🔥</span>
-              <span>مستمر</span>
+              <span id="dashboard-streak-count">1</span>
+              <span>أيام</span>
             </div>
           </div>
 
-          <div class="hero-stats-grid">
-            <!-- Tasbeeh Progress Box -->
-            <div class="hero-stat-box">
-              <div class="hero-stat-label">
-                <span>📿</span>
-                <span>تسبيح اليوم</span>
+          <div class="hero-gauge-container">
+            <div class="hero-gauge-stats">
+              <div class="gauge-pct-wrap">
+                <span id="dashboard-overall-pct" class="gauge-pct-val">0%</span>
+                <span class="gauge-pct-label">إنجاز اليوم الموحد</span>
               </div>
-              <div class="hero-stat-value-group">
-                <span id="daily-tasbeeh-count" class="hero-stat-num">0</span>
-                <span class="hero-stat-target">/ <span id="daily-tasbeeh-goal">100</span></span>
-              </div>
-              <div class="hero-mini-progress">
-                <div id="daily-tasbeeh-progress" class="hero-mini-fill" style="width: 0%;"></div>
-              </div>
+              <p id="dashboard-achievement-msg" class="dashboard-achievement-msg">
+                بداية مباركة، ابدأ وِردك اليومي ونل الأجر 🌿
+              </p>
             </div>
-
-            <!-- Quran Pages Box -->
-            <div class="hero-stat-box">
-              <div class="hero-stat-label">
-                <span>📖</span>
-                <span>تلاوة القرآن</span>
-              </div>
-              <div class="hero-stat-value-group">
-                <span id="daily-quran-pages" class="hero-stat-num">0</span>
-                <span class="hero-stat-target">صفحة</span>
-              </div>
-              <div class="hero-mini-progress">
-                <div class="hero-mini-fill" style="width: 100%;"></div>
-              </div>
+            <div class="hero-unified-progress-bar">
+              <div id="dashboard-overall-fill" class="hero-unified-fill" style="width: 0%;"></div>
+            </div>
+            <div class="hero-sub-meta">
+              <button id="open-dashboard-prefs-btn" class="btn-text-subtle">
+                ⚙️ تخصيص الأهداف التعبدية
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- Continue Reading Smart Banner -->
-        <div id="continue-reading-btn" class="continue-reading-card" role="button" tabindex="0">
-          <div class="continue-left-content">
-            <div class="continue-icon-circle">📖</div>
-            <div class="continue-text-meta">
-              <h4>متابعة القراءة</h4>
-              <p class="continue-detail">سورة الفاتحة — آية 1</p>
-            </div>
-          </div>
-          <div class="continue-action-arrow">←</div>
-        </div>
-
-        <!-- Quick Actions Grid (4 Primary Mobile Touch Targets) -->
+        <!-- Quick Actions Grid (8 High-Touch Tiles) -->
         <div class="quick-actions-section-title">
           <span>⚡</span>
-          <span>الوصول السريع</span>
+          <span>الوصول السريع للأوراد</span>
         </div>
-        <div class="quick-actions-grid">
+        <div class="quick-actions-grid quick-actions-grid-8">
+          <div class="quick-action-tile" data-action="goto-prayer" role="button" tabindex="0">
+            <div class="tile-icon-wrap">🕌</div>
+            <div class="tile-label-wrap">
+              <div class="tile-title">تسجيل الصلاة</div>
+              <div class="tile-sub">مواقيت وتتبع</div>
+            </div>
+          </div>
+          <div class="quick-action-tile" data-action="goto-azkar-morning" role="button" tabindex="0">
+            <div class="tile-icon-wrap">🌅</div>
+            <div class="tile-label-wrap">
+              <div class="tile-title">أذكار الصباح</div>
+              <div class="tile-sub">حصن المسلم</div>
+            </div>
+          </div>
+          <div class="quick-action-tile" data-action="goto-azkar-evening" role="button" tabindex="0">
+            <div class="tile-icon-wrap">🌙</div>
+            <div class="tile-label-wrap">
+              <div class="tile-title">أذكار المساء</div>
+              <div class="tile-sub">سكينة المساء</div>
+            </div>
+          </div>
           <div class="quick-action-tile" data-action="goto-quran" role="button" tabindex="0">
             <div class="tile-icon-wrap">📖</div>
             <div class="tile-label-wrap">
               <div class="tile-title">القرآن الكريم</div>
-              <div class="tile-sub">قراءة المصحف</div>
+              <div class="tile-sub">تلاوة ومصحف</div>
             </div>
           </div>
           <div class="quick-action-tile" data-action="goto-tasbeeh" role="button" tabindex="0">
@@ -141,19 +175,181 @@
               <div class="tile-sub">ورد التسبيح</div>
             </div>
           </div>
-          <div class="quick-action-tile" data-action="goto-duas" role="button" tabindex="0">
-            <div class="tile-icon-wrap">🤲</div>
+          <div class="quick-action-tile" data-action="open-add-dua" role="button" tabindex="0">
+            <div class="tile-icon-wrap">✍️</div>
             <div class="tile-label-wrap">
-              <div class="tile-title">أدعيتي الخاصة</div>
-              <div class="tile-sub">المناجاة والرجاء</div>
+              <div class="tile-title">إضافة دعاء</div>
+              <div class="tile-sub">حفظ مناجاة</div>
             </div>
           </div>
-          <div class="quick-action-tile" data-action="goto-azkar" role="button" tabindex="0">
-            <div class="tile-icon-wrap">🌅</div>
+          <div class="quick-action-tile" data-action="goto-qibla" role="button" tabindex="0">
+            <div class="tile-icon-wrap">🧭</div>
             <div class="tile-label-wrap">
-              <div class="tile-title">أذكار اليوم</div>
-              <div class="tile-sub">الصباح والمساء</div>
+              <div class="tile-title">اتجاه القبلة</div>
+              <div class="tile-sub">بوصلة الكعبة</div>
             </div>
+          </div>
+          <div class="quick-action-tile" data-action="goto-history" role="button" tabindex="0">
+            <div class="tile-icon-wrap">📊</div>
+            <div class="tile-label-wrap">
+              <div class="tile-title">سجل العبادات</div>
+              <div class="tile-sub">إحصاءات وأرقام</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Activity Summary Modules (Interactive Cards) -->
+        <div class="section-title-wrap">
+          <span class="section-title-icon">📌</span>
+          <h3 class="section-title-text">ملخص أوراد اليوم</h3>
+        </div>
+
+        <div class="dashboard-summary-cards-grid">
+          <!-- 1. Prayer Summary Card -->
+          <div class="dash-summary-card card" data-action="goto-prayer" role="button" tabindex="0">
+            <div class="dash-card-header">
+              <div class="dash-card-title-group">
+                <span class="dash-card-icon">🕌</span>
+                <strong>الصلوات المفروضة</strong>
+              </div>
+              <span id="dashboard-prayers-completed" class="dash-card-badge badge-gold">0 / 5 صلوات</span>
+            </div>
+            <div class="dash-card-body">
+              <div class="dash-prayer-next-row">
+                <span class="dash-sub-label">الصلاة القادمة:</span>
+                <span id="dashboard-prayer-next-name" class="dash-highlight-val">--</span>
+                <span id="dashboard-prayer-next-time" class="dash-time-tag">--:--</span>
+              </div>
+              <div class="dash-prayer-countdown-wrap">
+                <span>متبقي:</span>
+                <span id="dashboard-prayer-countdown" class="dash-countdown-val">--:--:--</span>
+              </div>
+            </div>
+            <div class="dash-card-footer">
+              <span>تسجيل صلوات اليوم ←</span>
+            </div>
+          </div>
+
+          <!-- 2. Tasbeeh & Istighfar Summary Card -->
+          <div class="dash-summary-card card" data-action="goto-tasbeeh" role="button" tabindex="0">
+            <div class="dash-card-header">
+              <div class="dash-card-title-group">
+                <span class="dash-card-icon">📿</span>
+                <strong>الاستغفار والتسبيح</strong>
+              </div>
+              <span class="dash-card-badge">
+                <span id="dashboard-tasbeeh-today">0</span> / <span id="dashboard-tasbeeh-target">100</span>
+              </span>
+            </div>
+            <div class="dash-card-body">
+              <div class="dash-mini-progress-track">
+                <div id="dashboard-tasbeeh-fill" class="dash-mini-progress-fill" style="width: 0%;"></div>
+              </div>
+              <p class="dash-card-hint">«سبحان الله وبحمده، سبحان الله العظيم»</p>
+            </div>
+            <div class="dash-card-footer">
+              <span>فتح السبحة الرقمية ←</span>
+            </div>
+          </div>
+
+          <!-- 3. Quran Summary Card -->
+          <div class="dash-summary-card card" data-action="goto-quran" role="button" tabindex="0">
+            <div class="dash-card-header">
+              <div class="dash-card-title-group">
+                <span class="dash-card-icon">📖</span>
+                <strong>القرآن الكريم</strong>
+              </div>
+              <span class="dash-card-badge">
+                <span id="dashboard-quran-pages-today">0</span> صفحة اليوم
+              </span>
+            </div>
+            <div class="dash-card-body">
+              <div class="dash-quran-pos-row">
+                <span class="dash-sub-label">آخر موضع:</span>
+                <span id="dashboard-quran-last-pos" class="dash-highlight-val">سورة الفاتحة</span>
+              </div>
+            </div>
+            <div class="dash-card-footer">
+              <span>متابعة التلاوة بالمصحف ←</span>
+            </div>
+          </div>
+
+          <!-- 4. Azkar Summary Card -->
+          <div class="dash-summary-card card" data-action="goto-azkar-morning" role="button" tabindex="0">
+            <div class="dash-card-header">
+              <div class="dash-card-title-group">
+                <span class="dash-card-icon">🌅</span>
+                <strong>الأذكار والتحصين</strong>
+              </div>
+              <span id="dashboard-azkar-badge" class="dash-card-badge">أذكار الصباح والمساء</span>
+            </div>
+            <div class="dash-card-body">
+              <p class="dash-card-hint">
+                «ألا بذكر الله تطمئن القلوب» — أذكار الصباح، المساء، والنوم
+              </p>
+            </div>
+            <div class="dash-card-footer">
+              <span>قراءة الأذكار اليومية ←</span>
+            </div>
+          </div>
+
+          <!-- 5. Duas Summary Card -->
+          <div class="dash-summary-card card" data-action="goto-duas" role="button" tabindex="0">
+            <div class="dash-card-header">
+              <div class="dash-card-title-group">
+                <span class="dash-card-icon">🤲</span>
+                <strong>أدعيتي ومناجاتي</strong>
+              </div>
+              <span class="dash-card-badge">
+                <span id="dashboard-duas-total">6</span> أدعية
+              </span>
+            </div>
+            <div class="dash-card-body">
+              <p class="dash-card-hint">
+                أدعيتك المحفوظة ومناجاتك الخاصة مرتبة في 7 تصنيفات
+              </p>
+            </div>
+            <div class="dash-card-footer">
+              <span>تصفح الأدعية والمناجاة ←</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Timeline: نشاطي اليوم -->
+        <div class="home-block">
+          <div class="home-block-header">
+            <div class="dash-card-title-group">
+              <span class="section-title-icon">⏱️</span>
+              <span class="home-block-title">نشاطي اليوم (الجدول الزمني)</span>
+            </div>
+          </div>
+
+          <!-- Filter Pills for Timeline -->
+          <div id="dashboard-timeline-filter" class="category-filter" style="margin-bottom: 12px;">
+            <button class="filter-pill active" data-filter="all">الكل</button>
+            <button class="filter-pill" data-filter="prayer">صلوات</button>
+            <button class="filter-pill" data-filter="tasbeeh">تسبيح</button>
+            <button class="filter-pill" data-filter="quran">قرآن</button>
+            <button class="filter-pill" data-filter="azkar">أذكار</button>
+            <button class="filter-pill" data-filter="dua">أدعية</button>
+          </div>
+
+          <!-- Chronological List -->
+          <div id="activity-timeline-list" class="activity-timeline-container">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+        </div>
+
+        <!-- Streaks & Achievements Section -->
+        <div class="home-block">
+          <div class="home-block-header">
+            <div class="dash-card-title-group">
+              <span class="section-title-icon">🏆</span>
+              <span class="home-block-title">أوسمة الالتزام والإنجاز</span>
+            </div>
+          </div>
+          <div id="dashboard-achievements-grid" class="achievements-scroll-grid">
+            <!-- Rendered dynamically by app.js -->
           </div>
         </div>
 
@@ -161,7 +357,7 @@
         <div class="spiritual-reminder-card pattern-bg">
           <div class="spiritual-reminder-header">
             <span>💫</span>
-            <span>تذكير اليوم</span>
+            <span>تذكير اليوم النبوي</span>
           </div>
           <p id="daily-reminder" class="reminder-text">أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ</p>
         </div>
@@ -177,20 +373,150 @@
           </div>
         </div>
 
-        <!-- Recent Activity Feed -->
+      </section>
+
+      <!-- ======================================== -->
+      <!-- 2. PRAYER SECTION (قسم الصلاة)          -->
+      <!-- ======================================== -->
+      <section id="prayer-section" class="section" aria-label="الصلاة ومواقيتها">
+
+        <!-- Top Title Bar -->
+        <div class="mobile-top-bar" style="padding-bottom: 4px;">
+          <h2 class="top-bar-greeting">الصلاة ومواقيتها 🕌</h2>
+        </div>
+
+        <!-- Location & Hijri Bar -->
+        <div class="prayer-location-bar card">
+          <div class="prayer-loc-info">
+            <span class="prayer-loc-pin">📍</span>
+            <div>
+              <strong id="prayer-current-location" class="prayer-loc-name">القاهرة، مصر</strong>
+              <span id="prayer-hijri-date" class="prayer-loc-hijri">--</span>
+            </div>
+          </div>
+          <div class="prayer-loc-actions">
+            <button id="prayer-gps-locate-btn" class="btn btn-sm btn-secondary" title="تحديد موقعي بدقة عبر GPS">
+              موقعي 📍
+            </button>
+            <button id="prayer-change-location-btn" class="btn btn-sm btn-secondary" title="تغيير المدينة يدويًا">
+              المدينة 🏙️
+            </button>
+          </div>
+        </div>
+
+        <!-- Next Prayer Countdown Hero Card -->
+        <div id="prayer-hero-card" class="prayer-hero-widget pattern-bg">
+          <!-- Rendered dynamically by prayer.js -->
+        </div>
+
+        <!-- Daily Prayers Times List -->
+        <div class="section-title-wrap">
+          <span class="section-title-icon">⏱️</span>
+          <h3 class="section-title-text">مواقيت صلوات اليوم</h3>
+        </div>
+        <div id="prayer-times-list" class="prayer-times-container">
+          <!-- Rendered dynamically by prayer.js -->
+        </div>
+
+        <!-- Daily Prayer Tracking Checklist -->
+        <div class="prayer-tracker-block card">
+          <div class="tracker-header">
+            <div>
+              <strong class="tracker-title">سجل صلوات اليوم</strong>
+              <p class="tracker-sub">اضغط على الصلاة عند أدائها لتسجيل طاعتك</p>
+            </div>
+            <div class="tracker-progress-badge">
+              <span id="prayer-daily-progress-count">0 / 5 صلوات</span>
+              <span id="prayer-daily-progress-pct" class="tracker-pct">0%</span>
+            </div>
+          </div>
+          <div class="tracker-progress-bar-wrap">
+            <div id="prayer-daily-progress-fill" class="tracker-progress-fill" style="width: 0%;"></div>
+          </div>
+          <div id="prayer-tracking-checklist" class="prayer-tracking-checklist">
+            <!-- Rendered by prayer.js -->
+          </div>
+        </div>
+
+        <!-- Weekly Prayer Consistency Summary -->
         <div class="home-block">
           <div class="home-block-header">
-            <span class="home-block-title">النشاط الأخير</span>
+            <span class="home-block-title">التزام الصلوات خلال 7 أيام</span>
           </div>
-          <div id="recent-activity-list" class="activity-list">
-            <p class="empty-state">لا يوجد نشاط حديث</p>
+          <div id="prayer-weekly-summary" class="prayer-weekly-container card">
+            <!-- Rendered by prayer.js -->
+          </div>
+        </div>
+
+        <!-- Qibla Direction Compass Card -->
+        <div id="qibla-compass-card" class="qibla-card card pattern-bg">
+          <div class="qibla-header">
+            <div>
+              <strong class="qibla-title">اتجاه القبلة الشريفة 🕋</strong>
+              <p class="qibla-sub">من موقعك الحالي نحو الكعبة المشرفة بمكة المكرمة</p>
+            </div>
+            <div class="qibla-degree-badge">
+              <span id="qibla-degree-val">136°</span>
+              <span id="qibla-cardinal-dir" class="qibla-cardinal">جنوب شرق</span>
+            </div>
+          </div>
+
+          <div class="compass-visual-wrap">
+            <div class="compass-outer-ring">
+              <span class="compass-mark mark-n">ش</span>
+              <span class="compass-mark mark-e">ق</span>
+              <span class="compass-mark mark-s">ج</span>
+              <span class="compass-mark mark-w">غ</span>
+              <div id="qibla-compass-dial" class="compass-dial">
+                <div class="compass-needle-kaaba">
+                  <span class="kaaba-icon">🕋</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="text-align:center; margin-top:12px;">
+            <button id="qibla-calibrate-btn" class="btn btn-sm btn-secondary" style="display:none;">
+              🧭 تفعيل بوصلة الهاتف المباشرة
+            </button>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">
+              ضع الهاتف أفقيًا بعيدًا عن أي مؤثرات مغناطيسية للحصول على أدق توجيه
+            </p>
+          </div>
+        </div>
+
+        <!-- Prayer Calculation Settings Drawer -->
+        <div class="prayer-settings-block card">
+          <h4 style="font-size:0.95rem; color:var(--gold-warm); margin-bottom:12px;">إعدادات الحساب والموقع</h4>
+          <div class="form-group">
+            <label for="prayer-city-select">اختر مدينتك يدويًا</label>
+            <select id="prayer-city-select" class="select-input">
+              <!-- Populated by prayer.js -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="prayer-method-select">طريقة الحساب الفلكي</label>
+            <select id="prayer-method-select" class="select-input">
+              <option value="egypt">الهيئة المصرية العامة للمساحة (مصر - افتراضي)</option>
+              <option value="mwl">رابطة العالم الإسلامي</option>
+              <option value="makkah">جامعة أم القرى (مكة المكرمة)</option>
+              <option value="karachi">جامعة العلوم الإسلامية بكراتشي</option>
+              <option value="isna">الجمعية الإسلامية لأمريكا الشمالية (ISNA)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="prayer-juristic-select">مذهب صلاة العصر</label>
+            <select id="prayer-juristic-select" class="select-input">
+              <option value="1">الجمهور (الشافعي، المالكي، الحنبلي - الظل مثل القامة)</option>
+              <option value="2">الحنفي (الظل مثلي القامة)</option>
+            </select>
           </div>
         </div>
 
       </section>
 
       <!-- ======================================== -->
-      <!-- 2. QURAN SECTION                         -->
+      <!-- 3. QURAN SECTION                         -->
       <!-- ======================================== -->
       <section id="quran-section" class="section" aria-label="القرآن الكريم">
 
@@ -207,7 +533,7 @@
             </div>
           </div>
 
-          <!-- Bookmarks Drawer / Panel -->
+          <!-- Bookmarks Panel -->
           <div class="card" style="padding:14px; margin-bottom: 16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <span style="font-size:0.9rem; font-weight:700; color:var(--gold-warm);">🔖 العلامات المرجعية</span>
@@ -225,7 +551,6 @@
 
         <!-- Immersive Reader View (Hidden by default) -->
         <div id="quran-reader-view" class="quran-view" style="display:none;">
-          <!-- Floating Reader Top Bar -->
           <div id="quran-reader-header" class="reader-header">
             <button id="quran-back-btn" class="reader-btn-pill" aria-label="العودة للسور">
               → السور
@@ -254,7 +579,7 @@
             <span id="quran-page-number">--</span>
           </div>
 
-          <!-- Reader Navigation (Prev / Next Surah) -->
+          <!-- Reader Navigation -->
           <div class="reader-navigation">
             <button id="quran-prev-btn" class="nav-btn" aria-label="السورة السابقة">
               السورة السابقة →
@@ -268,112 +593,88 @@
       </section>
 
       <!-- ======================================== -->
-      <!-- 3. TASBEEH SECTION                       -->
+      <!-- 4. TASBEEH & AZKAR SECTION               -->
       <!-- ======================================== -->
       <section id="tasbeeh-section" class="section" aria-label="التسبيح والأذكار">
 
-        <!-- Top Title Bar -->
         <div class="mobile-top-bar" style="padding-bottom: 8px;">
           <h2 class="top-bar-greeting">السبحة والأذكار 📿</h2>
         </div>
 
-        <!-- Tasbeeh Hero Counter Experience -->
         <div class="tasbeeh-counter-view">
-          <!-- Active Dhikr Display -->
-          <div class="tasbeeh-phrase-display-wrap">
-            <p id="tasbeeh-phrase-display" class="tasbeeh-phrase">سبحان الله</p>
-          </div>
+          <p id="tasbeeh-phrase-display" class="tasbeeh-phrase">سبحان الله</p>
 
-          <!-- Tactile Interactive Ring Counter -->
-          <div class="tasbeeh-counter-container">
-            <div id="tasbeeh-progress-ring" class="tasbeeh-progress-ring" role="button" aria-label="اضغط للعد">
-              <div class="ring-center">
-                <span id="tasbeeh-count-display" class="tasbeeh-count">0</span>
-                <span class="tasbeeh-target-label">الهدف</span>
-                <span id="tasbeeh-target-display" class="tasbeeh-target">33</span>
-              </div>
+          <div id="tasbeeh-progress-ring" class="tasbeeh-progress-ring" role="button" aria-label="اضغط للعد">
+            <div id="tasbeeh-progress-circle" class="tasbeeh-progress-circle"></div>
+            <div class="tasbeeh-ring-inner">
+              <span id="tasbeeh-count-display" class="tasbeeh-count">0</span>
+              <span class="tasbeeh-target-hint">الهدف</span>
+              <span id="tasbeeh-target-display" class="tasbeeh-target">33</span>
             </div>
           </div>
 
-          <!-- Large Ergonomic Tap Button -->
-          <button id="tasbeeh-increment-btn" class="tasbeeh-tap-btn" aria-label="اضغط للتسبيح">
-            <span>اضغط للتسبيح</span>
-            <span style="font-size:1.4rem;">📿</span>
-          </button>
+          <div class="tasbeeh-tap-action-row">
+            <button id="tasbeeh-increment-btn" class="tasbeeh-tap-btn" aria-label="اضغط للتسبيح">
+              <span>اضغط للتسبيح 📿</span>
+            </button>
+          </div>
 
-          <!-- Secondary Quick Controls (Undo, Reset, Sound) -->
-          <div class="tasbeeh-controls">
+          <div class="tasbeeh-controls-row">
             <button id="tasbeeh-undo-btn" class="control-btn" aria-label="تراجع">
-              <span>↩</span>
-              <span>تراجع</span>
+              <span>تراجع ↩️</span>
             </button>
             <button id="tasbeeh-reset-btn" class="control-btn" aria-label="إعادة تعيين">
-              <span>🔄</span>
-              <span>تصفير</span>
+              <span>تصفير 🔄</span>
             </button>
             <button id="tasbeeh-sound-toggle" class="control-btn" aria-label="تبديل الصوت">
-              <span>🔊</span>
-              <span>الصوت</span>
+              <span>الصوت 🔊</span>
             </button>
           </div>
 
-          <!-- Dhikr Preset Carousel -->
-          <div class="home-block">
-            <div class="home-block-header">
-              <span class="home-block-title">اختر الذكر</span>
-            </div>
+          <div class="phrase-selection-block">
+            <div class="phrase-header-title">اختر الذكر</div>
             <div id="tasbeeh-phrase-select" class="phrase-select-list">
               <!-- Rendered by tasbeeh.js -->
             </div>
-
-            <!-- Custom Dhikr Input Row -->
-            <div style="display:flex; gap:8px; margin-top:10px;">
-              <input type="text" id="tasbeeh-custom-phrase-input" class="text-input" placeholder="أدخل ذكرًا مخصصًا..." style="flex:2;" aria-label="ذكر مخصص">
-              <input type="number" id="tasbeeh-target-input" class="number-input" placeholder="الهدف" min="1" max="10000" value="33" style="flex:1;" aria-label="العدد المستهدف">
+            <div class="custom-phrase-row">
+              <input type="text" id="tasbeeh-custom-phrase-input" class="text-input" placeholder="أدخل ذكرًا مخصصًا...">
+              <input type="number" id="tasbeeh-target-input" class="number-input" placeholder="الهدف" min="1" max="10000" style="width:75px;">
             </div>
           </div>
 
-          <!-- Quick Stats Row -->
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
-            <div class="card" style="padding:14px; text-align:center;">
-              <span style="font-size:0.75rem; color:var(--text-muted); display:block;">تسبيح اليوم</span>
+          <div class="tasbeeh-stats-card card">
+            <div class="stats-col">
+              <span style="font-size:0.75rem; color:var(--text-muted);">تسبيح اليوم</span>
               <span id="tasbeeh-daily-count" style="font-size:1.5rem; font-weight:800; color:var(--text-primary);">0</span>
             </div>
-            <div class="card" style="padding:14px; text-align:center;">
-              <span style="font-size:0.75rem; color:var(--text-muted); display:block;">الإجمالي العام</span>
+            <div class="stats-col">
+              <span style="font-size:0.75rem; color:var(--text-muted);">الإجمالي العام</span>
               <span id="tasbeeh-lifetime-count" style="font-size:1.5rem; font-weight:800; color:var(--gold-warm);">0</span>
             </div>
           </div>
 
-          <!-- Sessions History -->
-          <div class="home-block">
-            <div class="home-block-header">
-              <span class="home-block-title">جلسات اليوم</span>
-            </div>
+          <div class="recent-sessions-block">
+            <div class="phrase-header-title" style="margin-bottom:8px;">جلسات اليوم</div>
             <div id="tasbeeh-sessions-list">
-              <p class="empty-state">لا توجد جلسات سابقة</p>
+              <!-- Rendered by tasbeeh.js -->
             </div>
           </div>
         </div>
 
         <!-- Categorized Azkar Browser -->
-        <div class="azkar-browser" style="margin-top:28px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.06);">
-          <div class="home-block-header">
-            <h3 class="home-block-title" style="font-size:1.05rem;">موسوعة الأذكار المأثورة 🌅</h3>
+        <div class="azkar-browser" style="margin-top: 24px;">
+          <div class="mobile-top-bar" style="padding-bottom: 8px;">
+            <h3 class="top-bar-greeting" style="font-size:1.15rem;">كتالوج الأذكار الصحيحة 📜</h3>
           </div>
-
-          <!-- Categories Grid -->
-          <div id="azkar-categories-list" class="azkar-categories">
+          <div id="azkar-categories-list" class="azkar-categories-grid">
             <!-- Rendered by tasbeeh.js -->
           </div>
-
-          <!-- Azkar Detail Content View -->
-          <div id="azkar-content-view" style="display:none; margin-top:12px;">
-            <div class="view-back-header">
-              <button id="azkar-back-btn" class="view-back-btn" aria-label="العودة للأذكار">→</button>
-              <h3 id="azkar-category-title" class="view-back-title">--</h3>
+          <div id="azkar-content-view" style="display:none; margin-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <h4 id="azkar-category-title" style="color:var(--gold-warm); font-size:1.1rem;">--</h4>
+              <button id="azkar-back-btn" class="btn btn-sm btn-secondary">العودة للأقسام →</button>
             </div>
-            <div id="azkar-items-list" style="display:flex; flex-direction:column; gap:12px;">
+            <div id="azkar-items-container">
               <!-- Rendered by tasbeeh.js -->
             </div>
           </div>
@@ -382,16 +683,14 @@
       </section>
 
       <!-- ======================================== -->
-      <!-- 4. DUAS SECTION                          -->
+      <!-- 5. DUAS SECTION                          -->
       <!-- ======================================== -->
       <section id="duas-section" class="section" aria-label="الأدعية">
 
-        <!-- Top Title Bar -->
         <div class="mobile-top-bar" style="padding-bottom: 8px;">
           <h2 class="top-bar-greeting">الأدعية والمناجاة 🤲</h2>
         </div>
 
-        <!-- Dedicated "أدعيتي الخاصة" Banner -->
         <div class="duas-banner-personal pattern-bg">
           <div>
             <div class="banner-title">✨ أدعيتي الخاصة</div>
@@ -402,13 +701,11 @@
           <span style="font-size:1.6rem;">🤍</span>
         </div>
 
-        <!-- Search Bar -->
         <div class="quran-search-container" style="margin-bottom: 12px;">
           <input type="search" id="duas-search-input" class="search-input" placeholder="ابحث في أدعيتك..." aria-label="البحث في الأدعية">
           <span class="search-icon-inside" aria-hidden="true">🔍</span>
         </div>
 
-        <!-- Category Scrollable Pills -->
         <div id="duas-category-filter" class="category-filter">
           <button class="filter-pill active" data-category="all">الكل</button>
           <button class="filter-pill" data-category="personal">أدعية شخصية</button>
@@ -420,7 +717,6 @@
           <button class="filter-pill" data-category="general">أدعية متنوعة</button>
         </div>
 
-        <!-- Duas List Container -->
         <div id="duas-list-container" class="duas-list">
           <!-- Rendered by duas.js -->
         </div>
@@ -430,53 +726,10 @@
           +
         </button>
 
-        <!-- Add / Edit Dua Bottom Sheet Modal -->
-        <div id="dua-modal" class="modal" role="dialog" aria-modal="true" style="display:none;">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h3 id="dua-modal-title">إضافة دعاء جديد</h3>
-              <button id="dua-cancel-btn" class="btn-icon" aria-label="إغلاق">✕</button>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label for="dua-text-input">نص الدعاء المبارك</label>
-                <textarea id="dua-text-input" class="textarea-input" rows="4" placeholder="اكتب نص الدعاء هنا بقلب خاشع..." required></textarea>
-              </div>
-              <div class="form-group">
-                <label for="dua-category-select">التصنيف</label>
-                <select id="dua-category-select" class="select-input">
-                  <option value="personal">أدعية شخصية</option>
-                  <option value="distress">أدعية تفريج الهم</option>
-                  <option value="rizq">أدعية الرزق</option>
-                  <option value="answered">أدعية الاستجابة</option>
-                  <option value="quran">أدعية القرآن</option>
-                  <option value="salawat">الصلاة على النبي</option>
-                  <option value="general">أدعية متنوعة</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="dua-notes-input">ملاحظات أو مناسبة الدعاء</label>
-                <textarea id="dua-notes-input" class="textarea-input" rows="2" placeholder="ملاحظات شخصية، المصدر، أو وقت الاستحباب..."></textarea>
-              </div>
-              <div class="form-group">
-                <label for="dua-repetition-input">عدد التكرار المستحب</label>
-                <input type="number" id="dua-repetition-input" class="number-input" min="1" max="1000" value="1">
-              </div>
-            </div>
-            <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
-              <button id="dua-delete-btn" class="btn btn-danger" style="display:none;">حذف 🗑️</button>
-              <div style="display:flex; gap:10px; margin-right:auto;">
-                <button id="dua-cancel-btn" class="btn btn-secondary">إلغاء</button>
-                <button id="dua-save-btn" class="btn btn-primary">حفظ الدعاء</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
       </section>
 
       <!-- ======================================== -->
-      <!-- 5. HISTORY SECTION                       -->
+      <!-- 6. HISTORY SECTION                       -->
       <!-- ======================================== -->
       <section id="history-section" class="section" aria-label="السجل والإحصاءات">
 
@@ -484,58 +737,67 @@
           <h2 class="top-bar-greeting">السجل والإحصاءات 📊</h2>
         </div>
 
-        <!-- Motivational Streak & Totals Card -->
-        <div class="history-stats-row">
-          <div class="history-stat-card card">
-            <span class="stat-icon">🔥</span>
-            <span class="stat-label">أيام الالتزام</span>
-            <span id="history-streak-count" class="stat-value">0</span>
+        <div class="history-metric-cards">
+          <div class="metric-card card">
+            <span class="metric-icon">🔥</span>
+            <div class="metric-value-wrap">
+              <span id="history-streak-count" class="metric-number">0</span>
+              <span class="metric-label">أيام الالتزام</span>
+            </div>
           </div>
-          <div class="history-stat-card card">
-            <span class="stat-icon">📿</span>
-            <span class="stat-label">إجمالي التسبيح</span>
-            <span id="history-total-tasbeeh" class="stat-value">0</span>
+          <div class="metric-card card">
+            <span class="metric-icon">📿</span>
+            <div class="metric-value-wrap">
+              <span id="history-total-tasbeeh" class="metric-number">0</span>
+              <span class="metric-label">إجمالي التسبيح</span>
+            </div>
           </div>
-          <div class="history-stat-card card">
-            <span class="stat-icon">📖</span>
-            <span class="stat-label">صفحات القرآن</span>
-            <span id="history-total-quran" class="stat-value">0</span>
+          <div class="metric-card card">
+            <span class="metric-icon">📖</span>
+            <div class="metric-value-wrap">
+              <span id="history-total-quran" class="metric-number">0</span>
+              <span class="metric-label">صفحات القرآن</span>
+            </div>
           </div>
         </div>
 
-        <!-- Period Segmented Tabs -->
-        <div class="history-tabs" role="tablist">
-          <button id="history-tab-daily" class="tab-btn active" data-period="daily">يومي</button>
-          <button id="history-tab-weekly" class="tab-btn" data-period="weekly">أسبوعي</button>
-          <button id="history-tab-monthly" class="tab-btn" data-period="monthly">شهري</button>
+        <div class="period-tabs-nav">
+          <button id="history-tab-daily" class="period-tab active" data-period="daily">يومي</button>
+          <button id="history-tab-weekly" class="period-tab" data-period="weekly">أسبوعي</button>
+          <button id="history-tab-monthly" class="period-tab" data-period="monthly">شهري</button>
         </div>
 
-        <!-- Activity Bar Chart Card -->
-        <div class="card" style="padding:16px; margin-bottom:20px;">
-          <div class="home-block-header">
-            <span class="home-block-title">مخطط النشاط التعبدي</span>
-          </div>
-          <div id="history-chart-container" class="chart-container" role="img" aria-label="مخطط النشاط">
+        <div class="chart-card card">
+          <h3 class="chart-title">مخطط النشاط التعبدي</h3>
+          <div id="history-chart-container" class="bar-chart-container">
             <!-- Rendered by history.js -->
           </div>
         </div>
 
-        <!-- Personal Records -->
-        <div class="card" style="padding:16px; margin-bottom:20px;">
-          <div class="home-block-header">
-            <span class="home-block-title">الأرقام القياسية الشخصية 🏆</span>
+        <div class="personal-records-card card">
+          <div class="records-header">
+            <span>🏆</span>
+            <h3>الأرقام القياسية الشخصية</h3>
           </div>
-          <div id="history-records-list">
-            <!-- Rendered by history.js -->
+          <div class="records-grid">
+            <div class="record-row">
+              <span class="record-name">أعلى تسبيح يومي</span>
+              <span id="record-best-tasbeeh" class="record-val">0</span>
+            </div>
+            <div class="record-row">
+              <span class="record-name">أكثر صفحات قرآن</span>
+              <span id="record-best-quran" class="record-val">0</span>
+            </div>
+            <div class="record-row">
+              <span class="record-name">أطول سلسلة متصلة</span>
+              <span id="record-best-streak" class="record-val">0</span>
+            </div>
           </div>
         </div>
 
-        <!-- Activity Timeline Feed -->
-        <div class="card" style="padding:16px;">
-          <div class="home-block-header">
-            <span class="home-block-title">سجل الأنشطة بالتفصيل</span>
-          </div>
-          <div id="history-activity-list">
+        <div class="activity-feed-card card">
+          <h3 class="chart-title" style="margin-bottom:12px;">سجل الأنشطة بالتفصيل</h3>
+          <div id="history-feed-list" class="activity-feed-list">
             <!-- Rendered by history.js -->
           </div>
         </div>
@@ -543,20 +805,31 @@
       </section>
 
       <!-- ======================================== -->
-      <!-- 6. SETTINGS SECTION                      -->
+      <!-- 7. SETTINGS SECTION                      -->
       <!-- ======================================== -->
       <section id="settings-section" class="section" aria-label="الإعدادات">
 
-        <div class="view-back-header">
-          <button id="settings-back-btn" class="view-back-btn" aria-label="رجوع">→</button>
-          <h2 class="view-back-title">الإعدادات ⚙️</h2>
+        <div class="mobile-top-bar" style="padding-bottom: 8px;">
+          <h2 class="top-bar-greeting">الإعدادات ⚙️</h2>
+          <button id="settings-back-btn" class="reader-btn-pill" aria-label="العودة">
+            ←
+          </button>
         </div>
 
-        <!-- Appearance Group -->
+        <!-- PWA Install Action Row in Settings -->
+        <div class="settings-group">
+          <div class="card" style="padding:16px;">
+            <button id="settings-install-pwa-btn" class="btn btn-primary" style="width:100%; display:none;">
+              <span>📲</span>
+              <span>تثبيت تطبيق وِرْدي على هاتفك</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Appearance & Language Group -->
         <div class="settings-group">
           <h3 class="settings-group-title">المظهر واللغة</h3>
           <div class="card">
-            <!-- Dark / Light Theme -->
             <div class="setting-row">
               <div class="setting-info">
                 <span class="setting-icon">🌙</span>
@@ -566,12 +839,11 @@
                 </div>
               </div>
               <label class="toggle-switch">
-                <input type="checkbox" id="setting-theme-toggle" checked>
+                <input type="checkbox" id="setting-theme-toggle">
                 <span class="toggle-slider"></span>
               </label>
             </div>
 
-            <!-- Language Toggle -->
             <div class="setting-row">
               <div class="setting-info">
                 <span class="setting-icon">🌐</span>
@@ -586,16 +858,15 @@
               </label>
             </div>
 
-            <!-- Font Size -->
-            <div class="setting-row" style="flex-direction:column; align-items:stretch; gap:10px;">
-              <div class="setting-info" style="justify-content:space-between;">
-                <div style="display:flex; align-items:center; gap:12px;">
+            <div class="setting-row" style="flex-direction:column; align-items:flex-start; gap:8px;">
+              <div style="display:flex; justify-content:space-between; width:100%;">
+                <div class="setting-info">
                   <span class="setting-icon">🔤</span>
                   <span class="setting-label">حجم خط النصوص</span>
                 </div>
-                <span id="setting-font-size-value" style="font-weight:700; color:var(--gold-warm);">18px</span>
+                <span id="setting-font-size-value" style="color:var(--gold-warm); font-weight:700;">18px</span>
               </div>
-              <input type="range" id="setting-font-size-range" class="range-slider" min="14" max="32" value="18" step="1" aria-label="حجم الخط">
+              <input type="range" id="setting-font-size-range" min="14" max="28" value="18" style="width:100%; accent-color:var(--gold-warm);">
             </div>
           </div>
         </div>
@@ -604,7 +875,6 @@
         <div class="settings-group">
           <h3 class="settings-group-title">التفضيلات والاستجابة</h3>
           <div class="card">
-            <!-- Sound -->
             <div class="setting-row">
               <div class="setting-info">
                 <span class="setting-icon">🔊</span>
@@ -619,7 +889,6 @@
               </label>
             </div>
 
-            <!-- Haptic -->
             <div class="setting-row">
               <div class="setting-info">
                 <span class="setting-icon">📳</span>
@@ -632,18 +901,6 @@
                 <input type="checkbox" id="setting-haptic-toggle" checked>
                 <span class="toggle-slider"></span>
               </label>
-            </div>
-
-            <!-- Daily Goal -->
-            <div class="setting-row">
-              <div class="setting-info">
-                <span class="setting-icon">🎯</span>
-                <div>
-                  <span class="setting-label">هدف التسبيح اليومي</span>
-                  <span class="setting-description">عدد التسبيحات المستهدف يوميًا</span>
-                </div>
-              </div>
-              <input type="number" id="setting-daily-goal-input" class="number-input" min="1" max="10000" value="100" style="width:90px; text-align:center;">
             </div>
           </div>
         </div>
@@ -679,10 +936,10 @@
           <div class="card" style="padding:16px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
               <span style="font-size:0.85rem; color:var(--text-secondary);">الإصدار</span>
-              <span id="app-version" style="font-weight:700; color:var(--gold-warm);">1.0.0</span>
+              <span id="app-version" style="font-weight:700; color:var(--gold-warm);">2.0.0 (Pro Upgrade)</span>
             </div>
             <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.6;">
-              🔒 <strong>خصوصية تامة 100%:</strong> لا خوادم خارجية، لا تتبع، ولا إعلانات. أدعيتك وتسبيحاتك وعلاماتك محفوظة على هذا الجهاز فقط.
+              🔒 <strong>خصوصية تامة 100%:</strong> لا خوادم خارجية، لا تتبع، ولا إعلانات. مواقيتك وصلواتك وتسبيحاتك وأدعيتك محفوظة على هذا الجهاز فقط.
             </p>
           </div>
         </div>
@@ -692,12 +949,16 @@
     </main>
 
     <!-- ============================================ -->
-    <!-- 5-TAB MOBILE FIXED BOTTOM NAVIGATION         -->
+    <!-- 6-TAB MOBILE FIXED BOTTOM NAVIGATION         -->
     <!-- ============================================ -->
-    <nav id="bottom-nav" role="navigation" aria-label="التنقل الرئيسي">
+    <nav id="bottom-nav" class="bottom-nav" role="navigation" aria-label="التنقل الرئيسي">
       <button class="nav-item active" data-section="home" aria-label="الرئيسية">
         <span class="nav-icon" aria-hidden="true">🏠</span>
         <span class="nav-label">الرئيسية</span>
+      </button>
+      <button class="nav-item" data-section="prayer" aria-label="الصلاة">
+        <span class="nav-icon" aria-hidden="true">🕌</span>
+        <span class="nav-label">الصلاة</span>
       </button>
       <button class="nav-item" data-section="quran" aria-label="القرآن الكريم">
         <span class="nav-icon" aria-hidden="true">📖</span>
@@ -730,10 +991,84 @@
   <div id="modal-overlay" class="modal-overlay" style="display:none;" aria-hidden="true"></div>
 
   <!-- ============================================ -->
+  <!-- DUA ADD / EDIT MODAL (At document.body root) -->
+  <!-- ============================================ -->
+  <div id="dua-modal" class="modal" role="dialog" aria-modal="true" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="dua-modal-title">إضافة دعاء جديد</h3>
+        <button id="dua-close-modal-btn" class="btn-icon dua-close-modal" aria-label="إغلاق">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="dua-text-input">نص الدعاء المبارك</label>
+          <textarea id="dua-text-input" class="textarea-input" rows="4" placeholder="اكتب نص الدعاء هنا بقلب خاشع..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="dua-category-select">التصنيف</label>
+          <select id="dua-category-select" class="select-input">
+            <option value="personal">أدعية شخصية</option>
+            <option value="distress">أدعية تفريج الهم</option>
+            <option value="rizq">أدعية الرزق</option>
+            <option value="answered">أدعية الاستجابة</option>
+            <option value="quran">أدعية القرآن</option>
+            <option value="salawat">الصلاة على النبي</option>
+            <option value="general">أدعية متنوعة</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="dua-notes-input">ملاحظات أو مناسبة الدعاء</label>
+          <textarea id="dua-notes-input" class="textarea-input" rows="2" placeholder="ملاحظات شخصية، المصدر، أو وقت الاستحباب..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="dua-repetition-input">عدد التكرار المستحب</label>
+          <input type="number" id="dua-repetition-input" class="number-input" min="1" max="1000" value="1">
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+        <button id="dua-delete-btn" class="btn btn-danger" style="display:none;">حذف 🗑️</button>
+        <div style="display:flex; gap:10px; margin-right:auto;">
+          <button id="dua-cancel-modal-btn" class="btn btn-secondary dua-close-modal">إلغاء</button>
+          <button id="dua-save-btn" class="btn btn-primary">حفظ الدعاء</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- DASHBOARD CUSTOMIZATION MODAL                -->
+  <!-- ============================================ -->
+  <div id="dashboard-prefs-modal" class="modal" role="dialog" aria-modal="true" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>تخصيص الأهداف التعبدية 🎯</h3>
+        <button id="close-dashboard-prefs-btn" class="btn-icon" aria-label="إغلاق">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px;">
+          حدد أهدافك اليومية ليتم احتساب نسبة إنجازك التعبدي الموحد بدقة:
+        </p>
+        <div class="form-group">
+          <label for="pref-tasbeeh-goal-input">هدف التسبيح اليومي (تسبيحة)</label>
+          <input type="number" id="pref-tasbeeh-goal-input" class="number-input" min="10" max="10000" value="100">
+        </div>
+        <div class="form-group">
+          <label for="pref-quran-goal-input">هدف تلاوة القرآن اليومي (صفحة)</label>
+          <input type="number" id="pref-quran-goal-input" class="number-input" min="1" max="100" value="4">
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button id="save-dashboard-prefs-btn" class="btn btn-primary">حفظ الأهداف ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
   <!-- CORE SCRIPTS — Sequential Load Order         -->
   <!-- ============================================ -->
   <script src="./assets/js/storage.js"></script>
   <script src="./assets/js/history.js"></script>
+  <script src="./assets/js/prayer.js"></script>
   <script src="./assets/js/quran.js"></script>
   <script src="./assets/js/tasbeeh.js"></script>
   <script src="./assets/js/duas.js"></script>
