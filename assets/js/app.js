@@ -243,19 +243,19 @@ class App {
           this.navigateTo('tasbeeh');
           setTimeout(() => {
             if (this.tasbeeh) {
-              const catItem = document.querySelector('.azkar-cat-card[data-cat="morning"]');
-              if (catItem) catItem.click();
+              this.tasbeeh.setPhrase('أصبحنا وأصبح الملك لله، والحمد لله', 33);
+              this.showToast('تم ضبط السبحة على أذكار الصباح 🌅');
             }
-          }, 200);
+          }, 150);
         }
         if (action === 'goto-azkar-evening') {
           this.navigateTo('tasbeeh');
           setTimeout(() => {
             if (this.tasbeeh) {
-              const catItem = document.querySelector('.azkar-cat-card[data-cat="evening"]');
-              if (catItem) catItem.click();
+              this.tasbeeh.setPhrase('أمسينا وأمسى الملك لله، والحمد لله', 33);
+              this.showToast('تم ضبط السبحة على أذكار المساء 🌙');
             }
-          }, 200);
+          }, 150);
         }
         if (action === 'open-add-dua') {
           if (this.duas) {

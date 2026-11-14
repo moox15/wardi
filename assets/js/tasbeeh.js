@@ -28,7 +28,6 @@ class TasbeehManager {
   async init() {
     this.setupEventListeners();
     this.renderPhraseSelector();
-    this.renderAzkarCategories();
     await this.loadStatsAndSessions();
     this.updateDisplay();
   }
@@ -417,84 +416,6 @@ class TasbeehManager {
         ]
       }
     };
-  }
-
-  /* ------------------------------------------------------------------ */
-  /*  Azkar Category Browser                                            */
-  /* ------------------------------------------------------------------ */
-  renderAzkarCategories() {
-    const container = document.getElementById('azkar-categories-list');
-    if (!container) return;
-
-    const categories = this.getAzkarData();
-
-    container.innerHTML = Object.entries(categories).map(([key, cat]) => `
-      <div class="azkar-category-card card" data-category="${key}" role="button" tabindex="0">
-        <div class="azkar-category-icon">${cat.icon}</div>
-        <h4 class="azkar-category-title">${cat.name}</h4>
-        <span class="azkar-count-badge">${cat.items.length} أذكار</span>
-      </div>
-    `).join('');
-
-    container.querySelectorAll('.azkar-category-card').forEach(card => {
-      card.addEventListener('click', () => {
-        this.showAzkarCategory(card.dataset.category);
-      });
-    });
-  }
-
-  showAzkarCategory(categoryKey) {
-    const categories = this.getAzkarData();
-    const cat = categories[categoryKey];
-    if (!cat) return;
-
-    const catList = document.getElementById('azkar-categories-list');
-    const contentView = document.getElementById('azkar-content-view');
-    const titleEl = document.getElementById('azkar-category-title');
-    const itemsEl = document.getElementById('azkar-items-list');
-
-    if (catList) catList.style.display = 'none';
-    if (contentView) contentView.style.display = 'block';
-    if (titleEl) titleEl.textContent = cat.name;
-
-    if (itemsEl) {
-      itemsEl.innerHTML = cat.items.map(item => `
-        <div class="azkar-item-card card">
-          <p class="azkar-item-text">${item.text}</p>
-          <div class="azkar-item-footer">
-            <span class="badge azkar-repeat-badge">تكرار: ${item.count}</span>
-            ${item.reference ? `<span class="azkar-reference-text">${item.reference}</span>` : ''}
-            <button class="btn btn-primary azkar-use-btn" data-text="${this._escapeAttr(item.text)}" data-count="${item.count}">
-              تسبيح بهذا الذكر 📿
-            </button>
-          </div>
-        </div>
-      `).join('');
-
-      itemsEl.querySelectorAll('.azkar-use-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const phrase = btn.dataset.text;
-          const target = parseInt(btn.dataset.count) || 33;
-          this.setPhrase(phrase, target);
-
-          // Scroll up to counter
-          const counterEl = document.querySelector('.tasbeeh-counter-view');
-          if (counterEl) counterEl.scrollIntoView({ behavior: 'smooth' });
-
-          if (window.WardApp) {
-            window.WardApp.showToast(`تم تعيين الذكر للعد (${target} مرة)`);
-          }
-        });
-      });
-    }
-
-    const backBtn = document.getElementById('azkar-back-btn');
-    if (backBtn) {
-      backBtn.onclick = () => {
-        if (contentView) contentView.style.display = 'none';
-        if (catList) catList.style.display = 'grid';
-      };
-    }
   }
 
   _escapeAttr(str) {

@@ -93,11 +93,6 @@ body
 - `#tasbeeh-lifetime-count` — lifetime total
 - `#tasbeeh-daily-count` — daily total
 - `#tasbeeh-sessions-list` — session history
-- `#azkar-categories-list` — azkar category list
-- `#azkar-content-view` — azkar detail view
-- `#azkar-items-list` — azkar items list
-- `#azkar-back-btn` — back to categories
-- `#azkar-category-title` — category title
 
 #### Duas Section (#duas-section)
 - `#duas-search-input` — search input

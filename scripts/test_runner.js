@@ -128,8 +128,8 @@ async function main() {
     await send('Emulation.setDeviceMetricsOverride', {
       width,
       height,
-      deviceScaleFactor: 2,
-      mobile: true
+      deviceScaleFactor: width < 768 ? 2 : 1,
+      mobile: width < 768
     });
   }
 
@@ -355,22 +355,33 @@ async function main() {
       const controlsRow = document.querySelector('.tasbeeh-controls-row');
       const phraseList = document.querySelector('.phrase-select-list');
       const statsCard = document.querySelector('.tasbeeh-stats-card');
+      const azkarBrowser = document.querySelector('.azkar-browser');
+      const azkarCategoriesList = document.getElementById('azkar-categories-list');
 
       return {
         currentCount: countEl ? countEl.innerText : null,
         tapBtnExists: !!tapBtn,
         controlsRowExists: !!controlsRow,
         phraseListExists: !!phraseList,
-        statsCardExists: !!statsCard
+        statsCardExists: !!statsCard,
+        azkarCatalogRemoved: azkarBrowser === null && azkarCategoriesList === null
       };
     })()`);
     console.log('✓ Tasbeeh section verified:', tasbeehData);
 
     await saveScreenshot('test_tasbeeh_section_390.png');
 
+    // Also test and screenshot on Desktop
+    await setViewport(1280, 800);
+    await new Promise(r => setTimeout(r, 400));
+    await saveScreenshot('test_tasbeeh_section_desktop.png');
+    // Restore mobile viewport
+    await setViewport(390, 844);
+    await new Promise(r => setTimeout(r, 300));
+
     results.push({
       name: 'Tasbeeh Ergonomic Controls & UI',
-      passed: tasbeehData.currentCount === '3' && tasbeehData.tapBtnExists && tasbeehData.controlsRowExists,
+      passed: tasbeehData.currentCount === '3' && tasbeehData.tapBtnExists && tasbeehData.controlsRowExists && tasbeehData.azkarCatalogRemoved,
       details: tasbeehData
     });
   } catch (err) {
