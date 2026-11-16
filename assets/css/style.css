@@ -684,6 +684,7 @@ body {
   font-size: 1.05rem;
   line-height: 1.7;
   color: var(--text-primary);
+  overflow-wrap: break-word;
 }
 
 /* ==========================================================================
@@ -1279,6 +1280,7 @@ body {
   color: var(--text-primary);
   margin-bottom: 12px;
   white-space: pre-line;
+  overflow-wrap: break-word;
 }
 
 .dua-notes-box {
@@ -2269,7 +2271,23 @@ input:checked + .toggle-slider::before {
 
 /* Activity Timeline (نشاطي اليوم) */
 .activity-timeline-container {
+  /* Reserve the right gutter so .timeline-node dots (absolute, right:-17px)
+     stay fully visible instead of being clipped by overflow-x:hidden —
+     same geometry as the legacy .timeline-list design. */
+  position: relative;
   margin-bottom: 24px;
+  padding-right: 18px;
+}
+
+.activity-timeline-container::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  right: 6px;
+  width: 2px;
+  background: var(--gold-border);
+  border-radius: 2px;
 }
 
 .activity-timeline-filters {
@@ -3463,3 +3481,597 @@ input:checked + .toggle-slider::before {
   }
 }
 
+
+/* ==========================================================================
+   12. Daily Goals System ("أهداف يومي") — Dashboard, Setup & Review
+   ========================================================================== */
+
+.btn-sm {
+  height: 34px;
+  padding: 0 14px;
+  font-size: 0.8rem;
+}
+
+.btn-success {
+  background: var(--success);
+  color: #FFFFFF;
+}
+
+.btn-success:active {
+  transform: scale(0.96);
+}
+
+/* ── Goals day header (inside home hero block) ── */
+.goals-day-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.goals-day-head-info {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.goals-day-pct {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--gold-warm);
+  font-variant-numeric: tabular-nums;
+}
+
+.goals-day-meta {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.goals-day-track {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.goals-day-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--primary-rich), var(--gold-warm));
+  transition: width 0.4s ease;
+}
+
+/* ── Goal rows ── */
+.daily-goals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.goal-row {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.goal-row.goal-done {
+  opacity: 0.75;
+  border-color: var(--success);
+}
+
+.goal-row.goal-overdue {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.goal-row.goal-priority-high:not(.goal-done) {
+  border-color: var(--gold-warm);
+}
+
+.goal-row-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.goal-icon {
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.goal-title-wrap {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.goal-title {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.goal-done .goal-title {
+  text-decoration: line-through;
+  text-decoration-color: var(--success);
+}
+
+.goal-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 3px;
+}
+
+.goal-tag {
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border: 1px solid var(--gold-border);
+  white-space: nowrap;
+}
+
+.tag-high {
+  background: var(--gold-glow);
+  color: var(--gold-warm);
+}
+
+.tag-overdue {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.tag-carry {
+  color: var(--gold-warm);
+}
+
+.tag-remind {
+  color: var(--text-secondary);
+}
+
+.goal-done-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--success);
+  background: var(--success-bg);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.goal-mini-track {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  overflow: hidden;
+  flex: 1;
+}
+
+.goal-mini-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--primary-rich), var(--gold-warm));
+  transition: width 0.4s ease;
+}
+
+.goal-prog-val {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.goal-progress-cell,
+.goal-row > div:not(.goal-row-head) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.goal-manual-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.goal-manual-controls .goal-prog-val {
+  min-width: 64px;
+  text-align: center;
+}
+
+.goal-adjust-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--gold-border);
+  color: var(--gold-warm);
+  font-size: 1.1rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.goal-adjust-btn:active {
+  transform: scale(0.9);
+}
+
+/* ── Goals empty state ── */
+.goals-empty {
+  text-align: center;
+  padding: 22px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.goals-empty-icon {
+  font-size: 2rem;
+}
+
+.goals-empty p {
+  font-size: 0.92rem;
+  color: var(--text-primary);
+}
+
+.goals-empty-sub {
+  font-size: 0.78rem !important;
+  color: var(--text-muted) !important;
+}
+
+/* ── Goals setup modal ── */
+.goals-setup-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.goal-setup-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm);
+}
+
+.goal-setup-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.goal-setup-info strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.goal-setup-info span {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.goal-setup-remove {
+  flex-shrink: 0;
+}
+
+.goals-setup-catalog {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.goals-setup-catalog .btn {
+  width: 100%;
+}
+
+@media (max-width: 380px) {
+  .goals-setup-catalog {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── End-of-day review modal ── */
+.review-lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 380px) {
+  .review-lists {
+    grid-template-columns: 1fr;
+  }
+}
+
+.review-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.review-list li {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.review-muted {
+  color: var(--text-muted) !important;
+  font-style: italic;
+}
+
+.review-suggestion {
+  background: var(--gold-glow);
+  border: 1px solid var(--gold-border);
+  color: var(--gold-champagne);
+  line-height: 1.6;
+}
+
+/* ── Smart insights ── */
+.insights-list {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.insight-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.insight-icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.insight-text {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.insights-empty {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 4px 0;
+}
+
+/* ==========================================================================
+   13. Weekly Report (تقرير الأسبوع) — history section
+   ========================================================================== */
+
+.weekly-report {
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.weekly-report-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 380px) {
+  .weekly-report-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.wr-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.wr-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--gold-warm);
+  font-variant-numeric: tabular-nums;
+}
+
+.wr-label {
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.wr-note {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   14. Azkar Browser (متصفح الأذكار) — tasbeeh section
+   ========================================================================== */
+
+.azkar-browser-block {
+  margin-top: 18px;
+  /* Fix: as a flex item of .tasbeeh-counter-view (align-items:center),
+     fit-content cross-sizing inflated this block to the azkar text's
+     unwrapped width, clipping cards on BOTH edges. Stretch to the
+     definite container width instead. */
+  align-self: stretch;
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.azkar-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.azkar-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.azkar-item {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color var(--transition-fast);
+  /* Flex-column children must be allowed to shrink below content size */
+  min-width: 0;
+  max-width: 100%;
+}
+
+.azkar-item.azkar-done {
+  border-color: var(--success);
+  opacity: 0.8;
+}
+
+.azkar-item.azkar-active {
+  border-color: var(--gold-warm);
+  box-shadow: 0 0 0 1px var(--gold-warm) inset;
+}
+
+.azkar-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.azkar-count-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--gold-warm);
+  background: var(--gold-glow);
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.azkar-done .azkar-count-badge {
+  color: var(--success);
+  background: var(--success-bg);
+}
+
+.azkar-ref {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.azkar-text {
+  font-family: var(--font-arabic);
+  font-size: 1.08rem;
+  line-height: 2;
+  color: var(--text-primary);
+  margin: 0;
+  /* Arabic shaping and ligatures are unaffected; only pathological
+     unbroken tokens (e.g. long custom phrases) may break mid-word */
+  overflow-wrap: break-word;
+}
+
+.azkar-done .azkar-text {
+  color: var(--text-secondary);
+}
+
+.azkar-item .btn {
+  align-self: flex-start;
+}
+
+/* ==========================================================================
+   15. Quran Manual Page Logging — reader view
+   ========================================================================== */
+
+.quran-page-log {
+  margin-top: 14px;
+  padding: 14px 16px;
+}
+
+.quran-page-log-head {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gold-warm);
+  margin-bottom: 6px;
+}
+
+.quran-page-log-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.quran-page-log-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.quran-page-log-row .number-input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+
+/* ==========================================================================
+   16. Accessibility & Motion Safety (global)
+   ========================================================================== */
+
+:focus-visible {
+  outline: 2px solid var(--gold-warm);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

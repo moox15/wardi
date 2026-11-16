@@ -97,6 +97,7 @@ class App {
     this.quran = null;
     this.tasbeeh = null;
     this.duas = null;
+    this.goals = null;
 
     this.currentSection = 'home';
     this.currentLang = 'ar';
@@ -150,6 +151,12 @@ class App {
         await this.duas.init();
       }
 
+      // Goals & accountability system ("أهداف يومي | My Daily Mission")
+      if (typeof GoalsManager !== 'undefined') {
+        this.goals = new GoalsManager(this.storage, this.history);
+        await this.goals.init();
+      }
+
       // Expose globally for cross-module & testing access
       window.app = this;
       window.storage = this.storage;
@@ -158,6 +165,7 @@ class App {
       window.quranManager = this.quran;
       window.tasbeehManager = this.tasbeeh;
       window.duasManager = this.duas;
+      window.goalsManager = this.goals;
 
       // 4. Setup Navigation & Hash Routing
       this.setupNavigation();
@@ -301,7 +309,10 @@ class App {
         this.prayer.renderPrayerTimes();
         this.prayer.renderTracker();
       }
-      if (sectionName === 'history' && this.history) this.history.renderStats('daily');
+      if (sectionName === 'history' && this.history) {
+        this.history.renderStats('daily');
+        this.history.renderWeeklyReport();
+      }
       if (sectionName === 'duas' && this.duas) this.duas.loadDuas();
     } catch (err) {
       console.error('Error refreshing section:', err);
@@ -427,8 +438,8 @@ class App {
       // 2. Dates
       this.updateDates();
 
-      // 3. Fetch Real Stats
-      const today = new Date().toISOString().split('T')[0];
+      // 3. Fetch Real Stats (LOCAL calendar day — never UTC)
+      const today = this.storage.todayKey();
       const stats = await this.history.getDailyStats(today);
       const prayerRec = await this.storage.getPrayerRecord(today);
       const tasbeehGoal = parseInt(this.storage.getSetting('daily_goal', 100)) || 100;
@@ -539,8 +550,37 @@ class App {
 
       // 9. Load Home Duas Favorites
       await this.loadHomeFavorites();
+
+      // 10. Goals dashboard block ("أهداف يومي") + smart insights
+      try {
+        if (this.goals) {
+          await this.goals.syncGoalProgress(true);
+          await this.goals.renderGoalsDashboard();
+        }
+      } catch (goalErr) {
+        console.error('goals dashboard render error:', goalErr);
+      }
+      await this.renderDashboardInsights();
     } catch (err) {
       console.error('updateDashboard error:', err);
+    }
+  }
+
+  /** Render honest, data-derived insights into #dashboard-insights-list. */
+  async renderDashboardInsights() {
+    const container = document.getElementById('dashboard-insights-list');
+    if (!container || !this.history.getSmartInsights) return;
+    try {
+      const insights = await this.history.getSmartInsights();
+      if (!insights || insights.length === 0) {
+        container.innerHTML = `<p class="insights-empty">ستظهر ملاحظات ذكية هنا بعد بضعة أيام من الاستخدام 🌱</p>`;
+        return;
+      }
+      container.innerHTML = insights.map(text =>
+        `<div class="insight-row"><span class="insight-icon">💡</span><p class="insight-text">${this._escapeHTML(text)}</p></div>`
+      ).join('');
+    } catch (e) {
+      console.error('renderDashboardInsights error:', e);
     }
   }
 
@@ -549,31 +589,12 @@ class App {
       const streakEl = document.getElementById('dashboard-streak-count');
       if (!streakEl) return;
 
-      const stats = await this.storage.getAllItems('daily_stats');
-      if (!stats || stats.length === 0) {
-        streakEl.textContent = '1';
-        return;
-      }
-
-      // Sort dates descending
-      const sorted = stats.sort((a, b) => b.date.localeCompare(a.date));
+      // Defer to the unified tracker's streak logic (local dates,
+      // includes prayers in active-day determination).
       let streak = 0;
-      let checkDate = new Date();
-
-      for (const rec of sorted) {
-        const dStr = checkDate.toISOString().split('T')[0];
-        if (rec.date === dStr) {
-          const totalActions = (rec.tasbeehCount || 0) + (rec.quranPages || 0) +
-                               (rec.prayersCompleted || 0) + (rec.azkarCompleted || 0);
-          if (totalActions > 0) {
-            streak++;
-            checkDate.setDate(checkDate.getDate() - 1);
-          } else {
-            break;
-          }
-        }
+      if (this.history && this.history.getStreak) {
+        streak = await this.history.getStreak();
       }
-
       streakEl.textContent = Math.max(1, streak);
     } catch (e) {
       console.warn('updateStreakDisplay error:', e);
@@ -591,8 +612,17 @@ class App {
     try {
       let activities = await this.storage.getTodayActivities();
 
+      // Map legacy filter pills to unified types as well
+      const filterAliases = {
+        prayer: ['prayer', 'prayer_completed'],
+        tasbeeh: ['tasbeeh', 'tasbeeh_count'],
+        quran: ['quran', 'quran_reading'],
+        azkar: ['azkar', 'dhikr_completed'],
+        dua: ['dua', 'dua_read']
+      };
       if (filter !== 'all') {
-        activities = activities.filter(a => a.type === filter);
+        const types = filterAliases[filter] || [filter];
+        activities = activities.filter(a => types.includes(a.type));
       }
 
       if (!activities || activities.length === 0) {
@@ -607,6 +637,15 @@ class App {
       }
 
       const typeMeta = {
+        // Unified tracker types
+        prayer_completed: { icon: '🕌', label: 'صلاة', color: 'var(--success)' },
+        tasbeeh_count: { icon: '📿', label: 'تسبيح', color: 'var(--gold-warm)' },
+        dhikr_completed: { icon: '🌅', label: 'ذكر', color: '#E09F3E' },
+        dua_read: { icon: '🤲', label: 'دعاء', color: '#5E81AC' },
+        quran_reading: { icon: '📖', label: 'قرآن', color: 'var(--primary-rich)' },
+        habit_completed: { icon: '⭐', label: 'عادة', color: 'var(--primary-rich)' },
+        daily_goal_completed: { icon: '🎯', label: 'هدف يومي', color: 'var(--success)' },
+        // Legacy aliases (older records — keep timeline readable)
         prayer: { icon: '🕌', label: 'صلاة', color: 'var(--success)' },
         tasbeeh: { icon: '📿', label: 'تسبيح', color: 'var(--gold-warm)' },
         quran: { icon: '📖', label: 'قرآن', color: 'var(--primary-rich)' },

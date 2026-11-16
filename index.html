@@ -134,6 +134,31 @@
           </div>
         </div>
 
+        <!-- Daily Goals / Mission Block ("أهداف يومي") -->
+        <div class="home-block">
+          <div class="home-block-header">
+            <div class="dash-card-title-group">
+              <span class="section-title-icon">🎯</span>
+              <span class="home-block-title">أهداف يومي | My Daily Mission</span>
+            </div>
+            <button id="open-goals-setup-btn" class="btn-text-subtle" aria-label="تعديل أهداف اليوم">
+              تعديل ✏️
+            </button>
+          </div>
+          <div class="goals-day-header card">
+            <div class="goals-day-head-info">
+              <span id="goals-day-pct" class="goals-day-pct">0%</span>
+              <span id="goals-day-meta" class="goals-day-meta">لم تحدد أهداف اليوم بعد</span>
+            </div>
+            <div class="goals-day-track">
+              <div id="goals-day-fill" class="goals-day-fill" style="width:0%;"></div>
+            </div>
+          </div>
+          <div id="daily-goals-list" class="daily-goals-list">
+            <!-- Rendered dynamically by goals.js -->
+          </div>
+        </div>
+
         <!-- Quick Actions Grid (8 High-Touch Tiles) -->
         <div class="quick-actions-section-title">
           <span>⚡</span>
@@ -353,6 +378,19 @@
           </div>
         </div>
 
+        <!-- Smart Insights (honest, data-derived observations) -->
+        <div class="home-block">
+          <div class="home-block-header">
+            <div class="dash-card-title-group">
+              <span class="section-title-icon">🧠</span>
+              <span class="home-block-title">ملاحظات ذكية عن وِردك</span>
+            </div>
+          </div>
+          <div id="dashboard-insights-list" class="insights-list card">
+            <p class="insights-empty">ستظهر ملاحظات ذكية هنا بعد بضعة أيام من الاستخدام 🌱</p>
+          </div>
+        </div>
+
         <!-- Spiritual Daily Reminder -->
         <div class="spiritual-reminder-card pattern-bg">
           <div class="spiritual-reminder-header">
@@ -511,6 +549,16 @@
               <option value="2">الحنفي (الظل مثلي القامة)</option>
             </select>
           </div>
+          <div class="form-group">
+            <label for="prayer-pre-reminder-select">تنبيه قبل الأذان (اختياري)</label>
+            <select id="prayer-pre-reminder-select" class="select-input">
+              <option value="0">بدون تنبيه مسبق</option>
+              <option value="5">قبل 5 دقائق</option>
+              <option value="10">قبل 10 دقائق</option>
+              <option value="15">قبل 15 دقائق</option>
+              <option value="30">قبل 30 دقيقة</option>
+            </select>
+          </div>
         </div>
 
       </section>
@@ -588,6 +636,20 @@
               ← السورة التالية
             </button>
           </div>
+
+          <!-- Honest manual page logging (explicit user entry only) -->
+          <div class="quran-page-log card">
+            <div class="quran-page-log-head">
+              <span>📖 تسجيل صفحات قرأت يدويًا</span>
+            </div>
+            <p class="quran-page-log-hint">
+              يُحتسب وقت التلاوة في المصحف تلقائيًا. سجّل صفحات قراءتها خارج التطبيق هنا.
+            </p>
+            <div class="quran-page-log-row">
+              <input type="number" id="quran-page-log-val" class="number-input" placeholder="عدد الصفحات" min="-200" max="200" style="flex:1;">
+              <button id="quran-page-log-btn" class="btn btn-primary btn-sm">سجّل الصفحات</button>
+            </div>
+          </div>
         </div>
 
       </section>
@@ -656,6 +718,14 @@
           <div class="recent-sessions-block">
             <div class="phrase-header-title" style="margin-bottom:8px;">جلسات اليوم</div>
             <div id="tasbeeh-sessions-list">
+              <!-- Rendered by tasbeeh.js -->
+            </div>
+          </div>
+
+          <!-- Azkar Browser (حصن المسلم — عدّ كل ذكر بعدده الأصيل عبر السبحة) -->
+          <div class="azkar-browser-block">
+            <div class="phrase-header-title" style="margin-bottom:8px;">📚 متصفح الأذكار</div>
+            <div id="azkar-browser">
               <!-- Rendered by tasbeeh.js -->
             </div>
           </div>
@@ -753,6 +823,11 @@
           <div id="history-chart-container" class="bar-chart-container">
             <!-- Rendered by history.js -->
           </div>
+        </div>
+
+        <!-- Weekly Report (تقرير الأسبوع) -->
+        <div id="history-weekly-report" class="weekly-report card">
+          <!-- Rendered by history.js -->
         </div>
 
         <div class="personal-records-card card">
@@ -882,6 +957,31 @@
                 <input type="checkbox" id="setting-haptic-toggle" checked>
                 <span class="toggle-slider"></span>
               </label>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-info">
+                <span class="setting-icon">🛡️</span>
+                <div>
+                  <span class="setting-label">وضع الالتزام (أهداف يومي)</span>
+                  <span class="setting-description">تذكيرات أكثر تشددًا للأهداف ذات الأولوية — بلطف وبلا إحراج</span>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-accountability-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-info">
+                <span class="setting-icon">⏰</span>
+                <div>
+                  <span class="setting-label">فاصل تذكير الأهداف</span>
+                  <span class="setting-description">كل كم دقيقة نُذكّرك بهدف لم يكتمل (5-240)</span>
+                </div>
+              </div>
+              <input type="number" id="setting-reminder-interval" class="number-input" min="5" max="240" value="45" style="width:80px;">
             </div>
           </div>
         </div>
@@ -1045,6 +1145,88 @@
   </div>
 
   <!-- ============================================ -->
+  <!-- DAILY GOALS SETUP MODAL ("أهداف يومي")       -->
+  <!-- ============================================ -->
+  <div id="goals-setup-modal" class="modal" role="dialog" aria-modal="true" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>أهداف يومي | My Daily Mission 🎯</h3>
+        <button id="goals-setup-close" class="btn-icon" aria-label="إغلاق">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:12px;">
+          اختر أورادك لهذا اليوم. يتتبع التطبيق التقدم تلقائيًا من نشاطك الحقيقي — لا عدّ وهمي.
+        </p>
+        <div id="goals-setup-list" class="goals-setup-list">
+          <!-- Rendered by goals.js -->
+        </div>
+
+        <div class="phrase-header-title" style="margin:16px 0 8px;">أضف من القائمة الجاهزة</div>
+        <div class="goals-setup-catalog">
+          <button class="btn btn-sm btn-secondary" data-goal-type="prayers">🕌 الصلوات الخمس (5)</button>
+          <button class="btn btn-sm btn-secondary" data-goal-type="azkar_morning">🌅 أذكار الصباح (13)</button>
+          <button class="btn btn-sm btn-secondary" data-goal-type="azkar_evening">🌙 أذكار المساء (9)</button>
+          <button class="btn btn-sm btn-secondary" data-goal-type="quran_minutes">📖 تلاوة 10 دقائق</button>
+          <button class="btn btn-sm btn-secondary" data-goal-type="tasbeeh">📿 100 تسبيحة</button>
+          <button class="btn btn-sm btn-secondary" data-goal-type="istighfar">🤲 100 استغفار</button>
+          <button class="btn btn-sm btn-secondary" data-goal-type="salawat">🕋 100 صلاة على النبي ﷺ</button>
+          <button class="btn btn-sm btn-secondary" data-goal-type="custom">⭐ هدف شخصي…</button>
+        </div>
+
+        <div class="goals-setup-tools" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;">
+          <button id="goals-setup-yesterday" class="btn btn-sm btn-secondary">استخدام أمس 🔁</button>
+          <button id="goals-setup-template" class="btn btn-sm btn-secondary">تطبيق قالب محفوظ 📋</button>
+          <button id="goals-setup-save-template" class="btn btn-sm btn-secondary">حفظ كقالب 💾</button>
+          <button id="goals-setup-add-custom" class="btn btn-sm btn-secondary">إضافة هدف مخصص ➕</button>
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button id="goals-setup-finish" class="btn btn-primary">جاهز لليوم 🌿</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- END-OF-DAY GOALS REVIEW MODAL                -->
+  <!-- ============================================ -->
+  <div id="goals-review-modal" class="modal" role="dialog" aria-modal="true" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>مراجعة يومك 🌙</h3>
+        <button id="goals-review-close" class="btn-icon" aria-label="إغلاق">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="review-pct-wrap" style="text-align:center; margin-bottom:14px;">
+          <span id="review-pct" class="goals-day-pct" style="font-size:2rem;">0%</span>
+          <p style="font-size:0.8rem; color:var(--text-muted);">نسبة إنجاز أهداف اليوم</p>
+        </div>
+        <div class="review-lists">
+          <div class="review-col">
+            <h4 style="color:var(--success); font-size:0.9rem; margin-bottom:6px;">أُنجز ✓</h4>
+            <ul id="review-done-list" class="review-list"></ul>
+          </div>
+          <div class="review-col">
+            <h4 style="color:var(--gold-warm); font-size:0.9rem; margin-bottom:6px;">لم يكتمل بعد</h4>
+            <ul id="review-miss-list" class="review-list"></ul>
+          </div>
+        </div>
+        <div id="review-suggestion" class="review-suggestion card" style="padding:10px 12px; font-size:0.85rem; margin-top:14px;"></div>
+        <div class="form-group" style="margin-top:14px;">
+          <label for="review-best-input">أجمل لحظة في يومك؟</label>
+          <input type="text" id="review-best-input" class="text-input" placeholder="مثال: إتمام أذكار الصباح قبل الشغل">
+        </div>
+        <div class="form-group">
+          <label for="review-focus-input">محور تركيزك غدًا؟</label>
+          <input type="text" id="review-focus-input" class="text-input" placeholder="مثال: قسّم الهدف المتأخر إلى نصفين">
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button id="goals-review-save" class="btn btn-primary">حفظ المراجعة 🌙</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
   <!-- CORE SCRIPTS — Sequential Load Order         -->
   <!-- ============================================ -->
   <script src="./assets/js/storage.js"></script>
@@ -1053,6 +1235,7 @@
   <script src="./assets/js/quran.js"></script>
   <script src="./assets/js/tasbeeh.js"></script>
   <script src="./assets/js/duas.js"></script>
+  <script src="./assets/js/goals.js"></script>
   <script src="./assets/js/app.js"></script>
 
 </body>

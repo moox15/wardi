@@ -537,16 +537,11 @@ class QuranManager {
       // Render Ayahs in Mushaf style
       this.renderSurah(surahData, targetAyah);
 
-      // Save position in settings and log to history
+      // Save position in settings
+      // NOTE: Opening a surah is NOT logged as reading activity.
+      // Real reading time is tracked by the reading tracker (startReadingTracker),
+      // and pages are logged only explicitly via logManualPages().
       this.savePosition(surahData.number, targetAyah);
-
-      if (window.WardApp && window.WardApp.history) {
-        window.WardApp.history.logActivity('quran', {
-          description: `قراءة سورة ${surahData.name}`,
-          surah: surahData.number,
-          pages: 1
-        });
-      }
 
       // Smooth scroll to target ayah if > 1
       if (targetAyah > 1) {
@@ -574,6 +569,42 @@ class QuranManager {
   /* ------------------------------------------------------------------ */
   /*  Mushaf-Style Rendering Engine                                     */
   /* ------------------------------------------------------------------ */
+  /**
+   * Tolerantly strips a leading Bismillah from an ayah text.
+   * Uthmani script uses ٱ (alef wasla, U+0671) and different diacritics,
+   * so exact string comparison fails. We normalize alef variants,
+   * strip Arabic diacritics (tashkeel), then match — and map the
+   * matched prefix back to the original text position.
+   */
+  static stripBismillah(text) {
+    if (!text) return text;
+    const BISMILLAH_RE = /^بسم\s*الله\s*الرحمن\s*الرحيم\s*/u;
+
+    const normChar = (ch) => (ch === 'ٱ' ? 'ا' : ch);
+    const isTashkeel = (ch) =>
+      /[\u064B-\u0652\u0670\u06D6-\u06ED\u08F0-\u08FF\u0640]/.test(ch);
+
+    // Build normalized string in lock-step with original positions,
+    // so we can map back to the original index after the bismillah.
+    let normalized = '';
+    const map = []; // normalized char index -> original index
+    for (let pos = 0; pos < text.length; pos++) {
+      const ch = text[pos];
+      if (isTashkeel(ch)) continue;
+      map[normalized.length] = pos;
+      normalized += normChar(ch);
+    }
+
+    const m = normalized.match(BISMILLAH_RE);
+    if (!m) return text;
+
+    // Original index just after the matched normalized prefix
+    let cut = map[m[0].length];
+    // Skip whitespace following the bismillah
+    while (cut < text.length && /\s/.test(text[cut])) cut++;
+    return text.substring(cut).trimStart();
+  }
+
   renderSurah(surahData, highlightAyah = 1) {
     const display = document.getElementById('quran-ayah-display');
     if (!display) return;
@@ -598,10 +629,7 @@ class QuranManager {
 
       // AlQuran cloud Uthmani often prepends Bismillah to Ayah 1 (except Fatiha where it's verse 1)
       if (ayah.numberInSurah === 1 && !isSurahFatiha && !isSurahTawbah) {
-        const bismillahClean = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
-        if (text.startsWith(bismillahClean)) {
-          text = text.substring(bismillahClean.length).trim();
-        }
+        text = QuranManager.stripBismillah(text);
       }
 
       const ayahNumArabic = this.toArabicDigits(ayah.numberInSurah);
@@ -670,9 +698,80 @@ class QuranManager {
   }
 
   /* ------------------------------------------------------------------ */
+  /*  Honest reading tracking                                            */
+  /*  - Active reading time (seconds spent actually viewing the reader)   */
+  /*    is accumulated and flushed to daily_stats.quranReadingMinutes.    */
+  /*  - Pages are counted ONLY when the user explicitly logs them or      */
+  /*    scrolls through the surah (surah-based progress).                 */
+  /* ------------------------------------------------------------------ */
+  startReadingTracker() {
+    this._readingActive = true;
+    this._readingSeconds = 0;
+    if (this._readingTimer) clearInterval(this._readingTimer);
+    this._readingTimer = setInterval(() => {
+      if (!this._readingActive) return;
+      if (document.visibilityState !== 'visible') return;
+      if (this.currentSectionReaderVisible() === false) return;
+      this._readingSeconds += 15; // 15s tick
+      // Flush a minute at a time
+      if (this._readingSeconds >= 60) {
+        const mins = Math.floor(this._readingSeconds / 60);
+        this._readingSeconds -= mins * 60;
+        if (window.WardApp && window.WardApp.history) {
+          window.WardApp.history.updateDailyStats('quranReadingMinutes', mins);
+        }
+      }
+    }, 15000);
+  }
+
+  currentSectionReaderVisible() {
+    const readerView = document.getElementById('quran-reader-view');
+    const quranSection = document.getElementById('quran-section');
+    return !!(readerView && readerView.style.display !== 'none' &&
+               quranSection && quranSection.classList.contains('active'));
+  }
+
+  stopReadingTracker(logSession = true) {
+    this._readingActive = false;
+    if (this._readingTimer) {
+      clearInterval(this._readingTimer);
+      this._readingTimer = null;
+    }
+    // Flush any partial minute (>=30s counts as a minute — honest rounding)
+    if (logSession && this._readingSeconds >= 30 && window.WardApp && window.WardApp.history) {
+      window.WardApp.history.updateDailyStats('quranReadingMinutes', 1);
+      if (this.currentSurahData) {
+        window.WardApp.history.logActivity('quran_reading', {
+          description: `تلاوة سورة ${this.currentSurahData.name}`,
+          surah: this.currentSurahData.number,
+          minutesApprox: Math.ceil(this._readingSeconds / 60)
+        });
+      }
+    }
+    this._readingSeconds = 0;
+  }
+
+  /** Explicit manual page logging (user-entered, honest). */
+  logManualPages(pages) {
+    const n = parseInt(pages);
+    if (!n || n === 0) return;
+    if (window.WardApp && window.WardApp.history) {
+      window.WardApp.history.updateDailyStats('quranPages', n);
+      window.WardApp.history.logActivity('quran_reading', {
+        description: n > 0 ? `قراءة ${n} صفحة من المصحف` : `تصحيح: ${Math.abs(n)} صفحة`,
+        pages: n
+      });
+      if (window.WardApp) {
+        window.WardApp.showToast(n > 0 ? `سُجّلت ${n} صفحة قراءة 📖` : 'تم تصحيح العدد', 'info');
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
   /*  Navigation & View Switching                                       */
   /* ------------------------------------------------------------------ */
   showSurahList() {
+    this.stopReadingTracker(true);
     const listView = document.getElementById('quran-surah-list-view');
     const readerView = document.getElementById('quran-reader-view');
     if (listView) listView.style.display = 'block';
@@ -685,6 +784,7 @@ class QuranManager {
     const readerView = document.getElementById('quran-reader-view');
     if (listView) listView.style.display = 'none';
     if (readerView) readerView.style.display = 'block';
+    this.startReadingTracker();
   }
 
   navigateSurah(direction) {
@@ -808,6 +908,29 @@ class QuranManager {
     if (ayahSearch) {
       ayahSearch.addEventListener('input', (e) => {
         this.searchWithinAyahs(e.target.value);
+      });
+    }
+
+    // Manual page logging (honest, user-entered)
+    const pageLogBtn = document.getElementById('quran-page-log-btn');
+    if (pageLogBtn) {
+      pageLogBtn.addEventListener('click', () => {
+        const input = document.getElementById('quran-page-log-val');
+        const n = input ? parseInt(input.value, 10) : 0;
+        if (!n || n === 0) {
+          if (window.WardApp) {
+            window.WardApp.showToast('أدخل عدد الصفحات أولًا', 'info');
+          }
+          return;
+        }
+        if (Math.abs(n) > 200) {
+          if (window.WardApp) {
+            window.WardApp.showToast('العدد كبير جدًا — الحد 200 صفحة', 'info');
+          }
+          return;
+        }
+        this.logManualPages(n);
+        if (input) input.value = '';
       });
     }
   }

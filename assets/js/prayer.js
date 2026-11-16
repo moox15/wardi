@@ -121,6 +121,7 @@ class PrayerManager {
     this.startCountdownTimer();
     this.setupQiblaCompass();
     await this.renderWeeklySummary();
+    this._startReminderScheduler();
   }
 
   /* ------------------------------------------------------------------ */
@@ -214,7 +215,7 @@ class PrayerManager {
       asr: fmt(asrTime),
       maghrib: fmt(maghribTime),
       isha: fmt(ishaTime),
-      date: dateObj.toISOString().split('T')[0]
+      date: (window.StorageManager ? new StorageManager().localDateKey(dateObj) : dateObj.toISOString().split('T')[0])
     };
 
     // Cache in localStorage for instant offline boots
@@ -440,7 +441,7 @@ class PrayerManager {
   /*  Prayer Tracking (Daily Checklist & History)                       */
   /* ------------------------------------------------------------------ */
   getTodayDateString() {
-    return new Date().toISOString().split('T')[0];
+    return this.storage.todayKey();
   }
 
   async loadTodayPrayerRecord() {
@@ -518,8 +519,8 @@ class PrayerManager {
     await this.renderTracker();
     await this.renderWeeklySummary();
 
-    // Log activity in history if marked done
-    if (!wasDone && window.WardApp && window.WardApp.history) {
+    // Log activity in history (with sign so un-marking corrects the stats)
+    if (window.WardApp && window.WardApp.history) {
       const arabicName = {
         fajr: 'صلاة الفجر',
         dhuhr: 'صلاة الظهر',
@@ -528,9 +529,10 @@ class PrayerManager {
         isha: 'صلاة العشاء'
       }[prayerId] || 'الصلاة';
 
-      await window.WardApp.history.logActivity('prayer', {
+      await window.WardApp.history.logActivity('prayer_completed', {
         prayer: prayerId,
-        description: `أداء ${arabicName}`
+        description: !wasDone ? `أداء ${arabicName}` : `إلغاء تسجيل ${arabicName}`,
+        count: !wasDone ? 1 : -1
       });
     }
 
@@ -560,7 +562,7 @@ class PrayerManager {
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const key = d.toISOString().split('T')[0];
+      const key = this.storage.localDateKey(d);
       const dayName = arabicDays[d.getDay()];
       const rec = recordMap[key];
 
@@ -575,7 +577,21 @@ class PrayerManager {
       days.push({ key, dayName, count, isToday: i === 0 });
     }
 
+    // Monthly consistency (last 30 days, real records only)
+    const monthRecords = await this.storage.getRecentPrayerRecords(30);
+    let monthDone = 0;
+    monthRecords.forEach(r => {
+      ['fajr','dhuhr','asr','maghrib','isha'].forEach(p => { if (r[p]) monthDone++; });
+    });
+    const monthPct = monthRecords.length > 0
+      ? Math.round((monthDone / (monthRecords.length * 5)) * 100) : 0;
+    const weekPct = Math.round((days.reduce((a, d) => a + d.count, 0) / (7 * 5)) * 100);
+
     container.innerHTML = `
+      <div class="prayer-consistency-row">
+        <span class="prayer-consistency-item">📅 آخر 7 أيام: <strong>${weekPct}%</strong></span>
+        <span class="prayer-consistency-item">🗓️ آخر 30 يوم: <strong>${monthPct}%</strong></span>
+      </div>
       <div class="weekly-tracker-grid">
         ${days.map(d => `
           <div class="weekly-day-col ${d.isToday ? 'today-col' : ''}">
@@ -660,22 +676,103 @@ class PrayerManager {
   }
 
   _listenOrientation(qiblaBearing) {
-    const dial = document.getElementById('qibla-compass-dial');
-    if (!dial) return;
+    // Remove any previous listener to avoid duplicates (leak prevention)
+    if (this._orientationHandler) {
+      window.removeEventListener('deviceorientation', this._orientationHandler, true);
+    }
 
-    window.addEventListener('deviceorientation', (e) => {
+    this._orientationHandler = (e) => {
       let heading = null;
       if (e.webkitCompassHeading) {
         heading = e.webkitCompassHeading;
-      } else if (e.alpha !== null) {
+      } else if (e.alpha !== null && e.alpha !== undefined) {
         heading = (360 - e.alpha) % 360;
       }
 
       if (heading !== null) {
-        const needleRotation = (qiblaBearing - heading + 360) % 360;
-        dial.style.transform = `rotate(${needleRotation}deg)`;
+        const dial = document.getElementById('qibla-compass-dial');
+        if (dial) {
+          const needleRotation = (qiblaBearing - heading + 360) % 360;
+          dial.style.transform = `rotate(${needleRotation}deg)`;
+        }
       }
-    }, true);
+    };
+    window.addEventListener('deviceorientation', this._orientationHandler, true);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Real reminder scheduler (works while the app/page is open)         */
+  /*  Browser PWA note: background scheduling after the page is fully    */
+  /*  closed cannot be guaranteed by any browser API we can rely on —    */
+  /*  notifications fire while the app is running or in background tabs. */
+  /* ------------------------------------------------------------------ */
+  _startReminderScheduler() {
+    if (this._reminderTimer) clearInterval(this._reminderTimer);
+    this._reminderTimer = setInterval(() => this._checkReminders(), 30000);
+    this._checkReminders();
+  }
+
+  async _checkReminders() {
+    try {
+      if (this.reminders && Object.values(this.reminders).every(v => !v)) return;
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+      const preMinutes = parseInt(this.storage.getSetting('prayer_pre_reminder', 0)) || 0;
+      const now = new Date();
+      const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const today = this.storage.todayKey();
+
+      const schedule = this.currentTimings;
+      if (!schedule) return;
+
+      const prayers = [
+        { id: 'fajr', name: 'الفجر' },
+        { id: 'sunrise', name: 'الشروق' },
+        { id: 'dhuhr', name: 'الظهر' },
+        { id: 'asr', name: 'العصر' },
+        { id: 'maghrib', name: 'المغرب' },
+        { id: 'isha', name: 'العشاء' }
+      ];
+
+      for (const p of prayers) {
+        if (p.id === 'sunrise') continue; // not a prayed prayer; no reminder
+        if (!this.reminders[p.id]) continue;
+
+        // Main adhan reminder
+        const mainKey = `wardi_notified_${today}_${p.id}`;
+        if (schedule[p.id] === hhmm && !localStorage.getItem(mainKey)) {
+          localStorage.setItem(mainKey, '1');
+          this._fireNotification(`حان الآن وقت صلاة ${p.name} 🕌`,
+            `حافظ على صلاة ${p.name} في وقتها. الله أكبر.`);
+        }
+        // Optional pre-prayer reminder
+        else if (preMinutes > 0) {
+          const [h, m] = schedule[p.id].split(':').map(Number);
+          const target = new Date();
+          target.setHours(h, m - preMinutes, 0, 0);
+          const preHHMM = `${String(target.getHours()).padStart(2, '0')}:${String(target.getMinutes()).padStart(2, '0')}`;
+          const preKey = `wardi_notified_pre_${today}_${p.id}`;
+          if (preHHMM === hhmm && !localStorage.getItem(preKey)) {
+            localStorage.setItem(preKey, '1');
+            this._fireNotification(`بعد ${preMinutes} دقائق: أذان صلاة ${p.name} ⏳`,
+              `استعد لصلاة ${p.name} — الوضوء والاستعداد.`);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('reminder check error:', err);
+    }
+  }
+
+  _fireNotification(title, body) {
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body, icon: './assets/icons/icon-192.png', silent: false });
+      }
+      if (window.WardApp) {
+        window.WardApp.showToast(`${title}`, 'info');
+      }
+    } catch (e) {}
   }
 
   /* ------------------------------------------------------------------ */
@@ -717,6 +814,19 @@ class PrayerManager {
         this.calculateTimings();
         this.renderPrayerTimes();
         if (window.WardApp) window.WardApp.showToast('تم تحديث مذهب صلاة العصر');
+      });
+    }
+
+    // Optional pre-prayer reminder (minutes before adhan)
+    const preRemindSelect = document.getElementById('prayer-pre-reminder-select');
+    if (preRemindSelect) {
+      preRemindSelect.value = String(this.storage.getSetting('prayer_pre_reminder', 0));
+      preRemindSelect.addEventListener('change', (e) => {
+        const v = parseInt(e.target.value) || 0;
+        this.storage.setSetting('prayer_pre_reminder', v);
+        if (window.WardApp) {
+          window.WardApp.showToast(v > 0 ? `سيصلك تنبيه قبل الأذان بـ ${v} دقيقة` : 'تم إلغاء التنبيه المسبق', 'info');
+        }
       });
     }
 
